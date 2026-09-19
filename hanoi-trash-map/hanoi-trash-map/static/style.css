@@ -1,0 +1,826 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family:
+        Inter,
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    background: #f3f6f5;
+    color: #17231f;
+}
+
+
+/* ========================================
+   APPLICATION
+======================================== */
+
+.app {
+    width: 100%;
+    height: 100vh;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* ========================================
+   HEADER
+======================================== */
+
+.topbar {
+    height: 72px;
+
+    flex-shrink: 0;
+
+    padding: 0 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background: #ffffff;
+
+    border-bottom: 1px solid #dce6e1;
+
+    position: relative;
+    z-index: 1000;
+}
+
+
+.brand {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+
+.subtitle {
+    margin-top: 3px;
+
+    font-size: 12px;
+
+    color: #687871;
+}
+
+
+/* ========================================
+   LIVE BADGE
+======================================== */
+
+.live-badge {
+    padding: 8px 13px;
+
+    border-radius: 999px;
+
+    background: #ecfdf3;
+
+    color: #16803c;
+
+    font-size: 12px;
+    font-weight: 800;
+}
+
+
+.live-dot {
+    display: inline-block;
+
+    width: 8px;
+    height: 8px;
+
+    margin-right: 6px;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+
+    animation: pulse 1.2s infinite;
+}
+
+
+@keyframes pulse {
+
+    0%,
+    100% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0.3;
+    }
+}
+
+
+/* ========================================
+   LAYOUT
+======================================== */
+
+.layout {
+    flex: 1;
+
+    min-height: 0;
+
+    display: flex;
+}
+
+
+.sidebar {
+    width: 360px;
+
+    flex-shrink: 0;
+
+    overflow-y: auto;
+
+    padding: 14px;
+
+    background: #f7faf8;
+
+    border-right: 1px solid #dce6e1;
+}
+
+
+.map-area {
+    position: relative;
+
+    flex: 1;
+
+    min-width: 0;
+    min-height: 0;
+}
+
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+
+/* ========================================
+   CARDS
+======================================== */
+
+.control-card,
+.stat-card {
+    background: #ffffff;
+
+    border: 1px solid #e0e9e5;
+
+    border-radius: 14px;
+
+    padding: 14px;
+
+    margin-bottom: 12px;
+
+    box-shadow:
+        0 4px 15px
+        rgba(20, 50, 35, 0.04);
+}
+
+
+.control-card h3 {
+    margin: 0 0 12px;
+
+    font-size: 15px;
+}
+
+
+/* ========================================
+   BUTTONS
+======================================== */
+
+.button-row {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr 1fr;
+
+    gap: 7px;
+}
+
+
+.btn {
+    border: 1px solid #d5dfda;
+
+    background: #ffffff;
+
+    border-radius: 9px;
+
+    padding: 9px 5px;
+
+    cursor: pointer;
+
+    font-weight: 700;
+
+    transition: 0.2s;
+}
+
+
+.btn:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 3px 8px
+        rgba(0, 0, 0, 0.08);
+}
+
+
+.btn.primary {
+    background: #16a34a;
+
+    border-color: #16a34a;
+
+    color: #ffffff;
+}
+
+
+/* ========================================
+   SPEED
+======================================== */
+
+.field-label {
+    display: block;
+
+    margin: 14px 0 7px;
+
+    font-size: 12px;
+
+    color: #65736d;
+
+    font-weight: 700;
+}
+
+
+.speed-row {
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 6px;
+}
+
+
+.speed-btn {
+    border: 1px solid #d5dfda;
+
+    background: #ffffff;
+
+    border-radius: 8px;
+
+    padding: 7px;
+
+    cursor: pointer;
+
+    font-weight: 700;
+}
+
+
+.speed-btn.active {
+    background: #e8f7ee;
+
+    border-color: #16a34a;
+
+    color: #15803d;
+}
+
+
+/* ========================================
+   SIMULATION STATUS
+======================================== */
+
+.sim-status {
+    margin-top: 12px;
+
+    padding: 9px;
+
+    border-radius: 8px;
+
+    background: #f3f6f5;
+
+    color: #53625b;
+
+    font-size: 12px;
+}
+
+
+/* ========================================
+   STATISTICS
+======================================== */
+
+.stats-grid {
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 10px;
+
+    margin-bottom: 12px;
+}
+
+
+.stat-card {
+    margin: 0;
+}
+
+
+.stat-card span {
+    display: block;
+
+    color: #687871;
+
+    font-size: 11px;
+}
+
+
+.stat-card strong {
+    display: block;
+
+    margin-top: 4px;
+
+    font-size: 23px;
+}
+
+
+/* ========================================
+   FORM
+======================================== */
+
+.input {
+    width: 100%;
+
+    margin-bottom: 8px;
+
+    padding: 10px;
+
+    border: 1px solid #d5dfda;
+
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    outline: none;
+}
+
+
+.input:focus {
+    border-color: #16a34a;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(22, 163, 74, 0.1);
+}
+
+
+.checkbox-row {
+    display: flex;
+
+    gap: 8px;
+
+    align-items: center;
+
+    margin: 9px 0;
+
+    font-size: 13px;
+}
+
+
+/* ========================================
+   TRUCK LIST
+======================================== */
+
+.section-title {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+}
+
+
+.section-title h3 {
+    margin: 0;
+}
+
+
+.section-title span {
+    font-size: 10px;
+
+    color: #16803c;
+
+    font-weight: 800;
+}
+
+
+.section-actions {
+    display: flex;
+
+    align-items: center;
+
+    gap: 8px;
+}
+
+
+.collapse-btn {
+    padding: 4px 7px;
+
+    border: 1px solid #d5dfda;
+
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #16803c;
+
+    cursor: pointer;
+
+    font-size: 10px;
+    font-weight: 800;
+}
+
+
+.collapse-btn:hover {
+    background: #f0faf3;
+}
+
+
+.truck-item {
+    padding: 11px;
+
+    border: 1px solid #e0e9e5;
+
+    border-radius: 10px;
+
+    margin-top: 9px;
+
+    background: #fbfdfc;
+}
+
+
+.truck-head {
+    display: flex;
+
+    justify-content: space-between;
+
+    font-size: 13px;
+
+    font-weight: 800;
+}
+
+
+.truck-meta {
+    display: flex;
+
+    justify-content: space-between;
+
+    margin-top: 6px;
+
+    color: #66756e;
+
+    font-size: 11px;
+}
+
+
+/* ========================================
+   PROGRESS
+======================================== */
+
+.progress {
+    height: 6px;
+
+    margin-top: 8px;
+
+    background: #e8eeeb;
+
+    border-radius: 99px;
+
+    overflow: hidden;
+}
+
+
+.progress > div {
+    height: 100%;
+
+    border-radius: inherit;
+
+    transition: width 0.3s;
+}
+
+
+/* ========================================
+   LEGEND
+======================================== */
+
+.legend {
+    display: grid;
+
+    gap: 8px;
+
+    font-size: 12px;
+}
+
+
+.legend-dot {
+    display: inline-block;
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    margin-right: 6px;
+}
+
+
+.legend-dot.waiting {
+    background: #f59e0b;
+}
+
+
+.legend-dot.collected {
+    background: #16a34a;
+}
+
+
+.legend-dot.broken {
+    background: #dc2626;
+}
+
+
+.legend-bin {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 22px;
+    height: 22px;
+
+    margin-right: 6px;
+
+    border: 1px solid #ffffff;
+    border-radius: 6px;
+
+    color: #ffffff;
+    font-size: 14px;
+    line-height: 1;
+    vertical-align: middle;
+
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.22);
+}
+
+
+.legend-bin.available {
+    background: #16a34a;
+}
+
+
+.legend-bin.full {
+    background: #ea580c;
+}
+
+
+.legend-bin.overloaded {
+    background: #dc2626;
+}
+
+
+.legend-bin.broken {
+    background: #6b7280;
+}
+
+
+.legend-line {
+    display: inline-block;
+
+    width: 24px;
+    height: 4px;
+
+    margin-right: 6px;
+
+    vertical-align: middle;
+
+    background: #16a34a;
+
+    border-radius: 99px;
+}
+
+
+/* ========================================
+   MAP OVERLAY
+======================================== */
+
+.map-overlay {
+    position: absolute;
+
+    top: 15px;
+    left: 55px;
+
+    z-index: 500;
+
+    padding: 10px 14px;
+
+    background:
+        rgba(255, 255, 255, 0.94);
+
+    border-radius: 10px;
+
+    box-shadow:
+        0 4px 16px
+        rgba(0, 0, 0, 0.12);
+
+    pointer-events: none;
+}
+
+
+.overlay-title {
+    font-size: 13px;
+
+    font-weight: 800;
+}
+
+
+#mapTime {
+    margin-top: 2px;
+
+    color: #16a34a;
+
+    font-size: 12px;
+
+    font-weight: 800;
+}
+
+
+/* ========================================
+   BIN ICONS
+======================================== */
+
+.bin-icon {
+    width: 30px;
+    height: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: 2px solid #ffffff;
+    border-radius: 8px 8px 9px 9px;
+
+    box-shadow:
+        0 2px 6px
+        rgba(0, 0, 0, 0.35);
+
+    transition: 0.3s;
+}
+
+
+.bin-glyph {
+    color: #ffffff;
+    font-size: 18px;
+    line-height: 1;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.28);
+}
+
+
+.bin-icon.available {
+    background: #16a34a;
+}
+
+
+.bin-icon.full {
+    background: #ea580c;
+}
+
+
+.bin-icon.overloaded {
+    background: #dc2626;
+}
+
+
+.bin-icon.broken {
+    background: #6b7280;
+}
+
+
+/* ========================================
+   TRUCK ICON
+======================================== */
+
+.truck-wrapper {
+    position: relative;
+}
+
+
+.truck-icon {
+    font-size: 29px;
+
+    filter:
+        drop-shadow(
+            0 2px 3px
+            rgba(0, 0, 0, 0.4)
+        );
+}
+
+
+.truck-pulse {
+    position: absolute;
+
+    left: 50%;
+    top: 50%;
+
+    width: 32px;
+    height: 32px;
+
+    transform:
+        translate(-50%, -50%);
+
+    border: 2px solid #22c55e;
+
+    border-radius: 50%;
+
+    animation:
+        truckPulse
+        1.4s infinite;
+}
+
+
+@keyframes truckPulse {
+
+    from {
+        transform:
+            translate(-50%, -50%)
+            scale(0.7);
+
+        opacity: 0.9;
+    }
+
+    to {
+        transform:
+            translate(-50%, -50%)
+            scale(1.7);
+
+        opacity: 0;
+    }
+}
+
+
+/* ========================================
+   SCROLLBAR
+======================================== */
+
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: #cad7d1;
+
+    border-radius: 20px;
+}
+
+
+/* ========================================
+   MOBILE
+======================================== */
+
+@media (max-width: 900px) {
+
+    .sidebar {
+        width: 300px;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .topbar {
+        height: 62px;
+    }
+
+    .subtitle {
+        display: none;
+    }
+
+    .layout {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: 42%;
+    }
+
+    .map-area {
+        height: 58%;
+    }
+
+}

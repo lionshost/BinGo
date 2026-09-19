@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>BinGo - Thu gom rác thông minh</title>
+
+    <meta name="description"
+          content="BinGo - Nền tảng giám sát thùng rác và tối ưu hoạt động thu gom rác đô thị.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+
+<header class="header" id="header">
+    <div class="container nav-container">
+
+        <a href="#" class="logo">
+            <span class="logo-icon">
+                <i class="fa-solid fa-recycle"></i>
+            </span>
+
+            <span>Bin<span>Go</span></span>
+        </a>
+
+        <nav class="nav" id="nav">
+            <a href="#home">Trang chủ</a>
+            <a href="#about">Giới thiệu</a>
+            <a href="#features">Tính năng</a>
+            <a href="#workflow">Hoạt động</a>
+            <a href="#technology">Công nghệ</a>
+        </nav>
+
+        <a href="map.html" class="nav-button">
+            <i class="fa-solid fa-map-location-dot"></i>
+            Xem bản đồ
+        </a>
+
+        <button class="menu-btn" id="menuBtn" aria-label="Mở menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+
+    </div>
+</header>
+
+
+<main>
+
+<!-- ================= HERO ================= -->
+
+<section class="hero" id="home">
+
+    <div class="hero-glow glow-one"></div>
+    <div class="hero-glow glow-two"></div>
+
+    <div class="container hero-container">
+
+        <div class="hero-content reveal">
+
+            <div class="badge">
+                <span></span>
+                Giải pháp đô thị thông minh
+            </div>
+
+            <h1>
+                Thu gom rác
+                <span>thông minh hơn.</span>
+                Thành phố sạch hơn.
+            </h1>
+
+            <p>
+                BinGo giúp giám sát các điểm thu gom rác, theo dõi trạng thái
+                thùng rác và trực quan hóa tuyến đường của xe thu gom trên
+                bản đồ số.
+            </p>
+
+            <div class="hero-buttons">
+
+                <a href="map.html" class="btn btn-primary">
+                    <i class="fa-solid fa-location-arrow"></i>
+                    Trải nghiệm Demo
+                </a>
+
+                <a href="#features" class="btn btn-secondary">
+                    Khám phá BinGo
+                    <i class="fa-solid fa-arrow-down"></i>
+                </a>
+
+            </div>
+
+            <div class="hero-stats">
+
+                <div>
+                    <strong>300+</strong>
+                    <span>Điểm thu gom</span>
+                </div>
+
+                <div>
+                    <strong>24/7</strong>
+                    <span>Giám sát hệ thống</span>
+                </div>
+
+                <div>
+                    <strong>Real-time</strong>
+                    <span>Mô phỏng tuyến xe</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- MAP PREVIEW -->
+
+        <div class="hero-visual reveal">
+
+            <div class="dashboard-card">
+
+                <div class="dashboard-header">
+
+                    <div>
+                        <span class="mini-title">BINGO CONTROL CENTER</span>
+                        <h3>Bản đồ giám sát</h3>
+                    </div>
+
+                    <div class="online">
+                        <span></span>
+                        Online
+                    </div>
+
+                </div>
+
+
+                <div class="map-preview">
+
+                    <div class="fake-road road-one"></div>
+                    <div class="fake-road road-two"></div>
+                    <div class="fake-road road-three"></div>
+                    <div class="fake-road road-four"></div>
+
+                    <div class="map-label label-one">Cầu Giấy</div>
+                    <div class="map-label label-two">Ba Đình</div>
+                    <div class="map-label label-three">Hoàn Kiếm</div>
+
+                    <span class="bin-marker green marker-1">
+                        <i class="fa-solid fa-trash"></i>
+                    </span>
+
+                    <span class="bin-marker orange marker-2">
+                        <i class="fa-solid fa-trash"></i>
+                    </span>
+
+                    <span class="bin-marker red marker-3">
+                        <i class="fa-solid fa-trash"></i>
+                    </span>
+
+                    <span class="bin-marker green marker-4">
+                        <i class="fa-solid fa-trash"></i>
+                    </span>
+
+                    <span class="bin-marker orange marker-5">
+                        <i class="fa-solid fa-trash"></i>
+                    </span>
+
+                    <span class="truck">
+                        <i class="fa-solid fa-truck"></i>
+                    </span>
+
+                    <svg class="route-svg"
+                         viewBox="0 0 600 350"
+                         preserveAspectRatio="none">
+
+                        <path
+                            d="M70,270 C160,230 170,110 280,150 S390,270 530,80"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="5"
+                            stroke-linecap="round"
+                            stroke-dasharray="10 10">
+                        </path>
+
+                    </svg>
+
+                </div>
+
+
+                <div class="dashboard-footer">
+
+                    <div>
+                        <span class="status-dot green-dot"></span>
+                        Bình thường
+                        <strong>218</strong>
+                    </div>
+
+                    <div>
+                        <span class="status-dot orange-dot"></span>
+                        Sắp đầy
+                        <strong>64</strong>
+                    </div>
+
+                    <div>
+                        <span class="status-dot red-dot"></span>
+                        Cần thu gom
+                        <strong>18</strong>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="floating-card card-top">
+                <div class="float-icon">
+                    <i class="fa-solid fa-route"></i>
+                </div>
+
+                <div>
+                    <small>Tuyến đang hoạt động</small>
+                    <strong>Xe #BG-05</strong>
+                </div>
+            </div>
+
+
+            <div class="floating-card card-bottom">
+
+                <div class="float-icon warning">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+
+                <div>
+                    <small>Cảnh báo mới</small>
+                    <strong>Thùng rác đạt 92%</strong>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= ABOUT ================= -->
+
+<section class="about section" id="about">
+
+    <div class="container">
+
+        <div class="section-heading reveal">
+            <span class="section-tag">VẤN ĐỀ & GIẢI PHÁP</span>
+
+            <h2>
+                Một cách tiếp cận mới cho
+                <span>quản lý rác đô thị</span>
+            </h2>
+
+            <p>
+                Thay vì thu gom theo lịch cố định, BinGo trực quan hóa dữ liệu
+                để hỗ trợ việc xác định điểm cần thu gom và tuyến đường phù hợp.
+            </p>
+        </div>
+
+
+        <div class="problem-grid">
+
+            <div class="problem-card reveal">
+
+                <div class="problem-icon red-bg">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+
+                <h3>Thùng rác quá tải</h3>
+
+                <p>
+                    Các điểm tập kết có thể đầy trước lịch thu gom,
+                    gây mất vệ sinh và ảnh hưởng cảnh quan đô thị.
+                </p>
+
+            </div>
+
+
+            <div class="arrow-card reveal">
+                <i class="fa-solid fa-arrow-right"></i>
+            </div>
+
+
+            <div class="problem-card solution reveal">
+
+                <div class="problem-icon green-bg">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+
+                <h3>Giám sát thông minh</h3>
+
+                <p>
+                    BinGo hiển thị trạng thái các điểm thu gom trực tiếp
+                    trên bản đồ và hỗ trợ phát hiện các khu vực cần xử lý.
+                </p>
+
+            </div>
+
+
+            <div class="problem-card solution reveal">
+
+                <div class="problem-icon blue-bg">
+                    <i class="fa-solid fa-route"></i>
+                </div>
+
+                <h3>Tối ưu tuyến đường</h3>
+
+                <p>
+                    Mô phỏng hành trình xe thu gom, giúp trực quan hóa
+                    quá trình di chuyển giữa các điểm cần xử lý.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= FEATURES ================= -->
+
+<section class="features section" id="features">
+
+    <div class="container">
+
+        <div class="section-heading reveal">
+
+            <span class="section-tag">TÍNH NĂNG</span>
+
+            <h2>
+                Mọi thứ bạn cần trên
+                <span>một nền tảng</span>
+            </h2>
+
+            <p>
+                Từ bản đồ các điểm thu gom đến mô phỏng hành trình xe rác,
+                BinGo cung cấp góc nhìn trực quan về toàn bộ hệ thống.
+            </p>
+
+        </div>
+
+
+        <div class="feature-grid">
+
+            <article class="feature-card featured reveal">
+
+                <div class="feature-icon">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+
+                <h3>Bản đồ thùng rác</h3>
+
+                <p>
+                    Hiển thị hàng trăm điểm thu gom trên bản đồ thành phố,
+                    giúp theo dõi vị trí và trạng thái từng điểm.
+                </p>
+
+                <div class="feature-visual mini-map">
+
+                    <span class="mini-dot dot-a"></span>
+                    <span class="mini-dot dot-b"></span>
+                    <span class="mini-dot dot-c"></span>
+                    <span class="mini-dot dot-d"></span>
+
+                    <i class="fa-solid fa-location-dot mini-location"></i>
+
+                </div>
+
+            </article>
+
+
+            <article class="feature-card reveal">
+
+                <div class="feature-icon">
+                    <i class="fa-solid fa-gauge-high"></i>
+                </div>
+
+                <h3>Trạng thái thùng rác</h3>
+
+                <p>
+                    Phân loại trực quan theo mức độ đầy để dễ dàng xác định
+                    các điểm cần ưu tiên thu gom.
+                </p>
+
+                <div class="progress-list">
+
+                    <div>
+                        <span>Bin #102</span>
+                        <b>35%</b>
+                    </div>
+
+                    <progress value="35" max="100"></progress>
+
+                    <div>
+                        <span>Bin #208</span>
+                        <b>72%</b>
+                    </div>
+
+                    <progress value="72" max="100"></progress>
+
+                    <div>
+                        <span>Bin #315</span>
+                        <b>94%</b>
+                    </div>
+
+                    <progress value="94" max="100"></progress>
+
+                </div>
+
+            </article>
+
+
+            <article class="feature-card reveal">
+
+                <div class="feature-icon">
+                    <i class="fa-solid fa-truck-fast"></i>
+                </div>
+
+                <h3>Mô phỏng xe thu gom</h3>
+
+                <p>
+                    Theo dõi xe rác di chuyển qua các điểm thu gom bằng
+                    animation mô phỏng gần với hệ thống real-time.
+                </p>
+
+                <div class="truck-animation">
+
+                    <div class="track"></div>
+
+                    <div class="moving-truck">
+                        <i class="fa-solid fa-truck"></i>
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <article class="feature-card reveal">
+
+                <div class="feature-icon">
+                    <i class="fa-solid fa-bell"></i>
+                </div>
+
+                <h3>Cảnh báo thông minh</h3>
+
+                <p>
+                    Làm nổi bật những thùng rác có mức độ đầy cao,
+                    hỗ trợ người vận hành phát hiện nhanh điểm bất thường.
+                </p>
+
+                <div class="alert-demo">
+
+                    <i class="fa-solid fa-circle-exclamation"></i>
+
+                    <div>
+                        <strong>Thùng #BG-184</strong>
+                        <span>Mức đầy: 92% · Cần thu gom</span>
+                    </div>
+
+                </div>
+
+            </article>
+
+
+            <article class="feature-card reveal">
+
+                <div class="feature-icon">
+                    <i class="fa-solid fa-chart-pie"></i>
+                </div>
+
+                <h3>Dashboard trực quan</h3>
+
+                <p>
+                    Tổng hợp số lượng điểm thu gom, trạng thái và hoạt động
+                    của hệ thống trong một giao diện quản lý.
+                </p>
+
+            </article>
+
+
+            <article class="feature-card reveal">
+
+                <div class="feature-icon">
+                    <i class="fa-solid fa-leaf"></i>
+                </div>
+
+                <h3>Hướng tới đô thị xanh</h3>
+
+                <p>
+                    Ứng dụng công nghệ để hỗ trợ hoạt động thu gom hiệu quả
+                    và xây dựng môi trường đô thị sạch hơn.
+                </p>
+
+            </article>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= WORKFLOW ================= -->
+
+<section class="workflow section" id="workflow">
+
+    <div class="container">
+
+        <div class="section-heading reveal">
+
+            <span class="section-tag">CÁCH HOẠT ĐỘNG</span>
+
+            <h2>
+                BinGo hoạt động
+                <span>như thế nào?</span>
+            </h2>
+
+        </div>
+
+
+        <div class="workflow-grid">
+
+            <div class="workflow-item reveal">
+
+                <div class="step-number">01</div>
+
+                <div class="workflow-icon">
+                    <i class="fa-solid fa-trash-can"></i>
+                </div>
+
+                <h3>Thu thập dữ liệu</h3>
+
+                <p>
+                    Các điểm thu gom được lưu trữ cùng vị trí và trạng thái.
+                </p>
+
+            </div>
+
+
+            <div class="workflow-line"></div>
+
+
+            <div class="workflow-item reveal">
+
+                <div class="step-number">02</div>
+
+                <div class="workflow-icon">
+                    <i class="fa-solid fa-server"></i>
+                </div>
+
+                <h3>Xử lý dữ liệu</h3>
+
+                <p>
+                    Hệ thống phân tích trạng thái và xác định các điểm cần xử lý.
+                </p>
+
+            </div>
+
+
+            <div class="workflow-line"></div>
+
+
+            <div class="workflow-item reveal">
+
+                <div class="step-number">03</div>
+
+                <div class="workflow-icon">
+                    <i class="fa-solid fa-route"></i>
+                </div>
+
+                <h3>Tạo tuyến thu gom</h3>
+
+                <p>
+                    Các điểm cần thu gom được kết nối thành hành trình trực quan.
+                </p>
+
+            </div>
+
+
+            <div class="workflow-line"></div>
+
+
+            <div class="workflow-item reveal">
+
+                <div class="step-number">04</div>
+
+                <div class="workflow-icon">
+                    <i class="fa-solid fa-truck"></i>
+                </div>
+
+                <h3>Xe thực hiện thu gom</h3>
+
+                <p>
+                    Chuyển động xe được mô phỏng trực tiếp trên bản đồ.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= TECHNOLOGY ================= -->
+
+<section class="technology section" id="technology">
+
+    <div class="container technology-container">
+
+        <div class="technology-content reveal">
+
+            <span class="section-tag">BINGO PLATFORM</span>
+
+            <h2>
+                Biến dữ liệu thành
+                <span>hành động</span>
+            </h2>
+
+            <p>
+                Giao diện BinGo được thiết kế để người vận hành có thể
+                nhanh chóng nhận biết tình trạng hệ thống và quan sát
+                quá trình thu gom.
+            </p>
+
+
+            <div class="tech-benefits">
+
+                <div>
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    <span>
+                        <strong>Bản đồ trực quan</strong>
+                        Quan sát toàn bộ điểm thu gom trong thành phố.
+                    </span>
+                </div>
+
+                <div>
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    <span>
+                        <strong>Mô phỏng thời gian thực</strong>
+                        Theo dõi chuyển động của xe thu gom trên tuyến.
+                    </span>
+                </div>
+
+                <div>
+                    <i class="fa-solid fa-circle-check"></i>
+
+                    <span>
+                        <strong>Dễ dàng mở rộng</strong>
+                        Có thể tích hợp IoT và dữ liệu GPS trong tương lai.
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="tech-terminal reveal">
+
+            <div class="terminal-top">
+                <span></span>
+                <span></span>
+                <span></span>
+
+                <small>BinGo System Monitor</small>
+            </div>
+
+            <div class="terminal-content">
+
+                <p>
+                    <span>●</span>
+                    SYSTEM STATUS
+                    <strong>ONLINE</strong>
+                </p>
+
+                <p>
+                    <span>●</span>
+                    MAP SERVICE
+                    <strong>CONNECTED</strong>
+                </p>
+
+                <p>
+                    <span>●</span>
+                    COLLECTION POINTS
+                    <strong>300 ACTIVE</strong>
+                </p>
+
+                <p>
+                    <span>●</span>
+                    TRUCK SIMULATION
+                    <strong>RUNNING</strong>
+                </p>
+
+                <div class="terminal-loader">
+                    <span></span>
+                </div>
+
+                <small>
+                    Monitoring Hanoi waste collection network...
+                </small>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ================= CTA ================= -->
+
+<section class="cta">
+
+    <div class="container">
+
+        <div class="cta-box reveal">
+
+            <div>
+
+                <span class="section-tag">TRẢI NGHIỆM BINGO</span>
+
+                <h2>
+                    Khám phá hệ thống thu gom
+                    rác thông minh ngay hôm nay.
+                </h2>
+
+                <p>
+                    Mở bản đồ BinGo để xem các điểm thu gom và mô phỏng
+                    hành trình của xe rác.
+                </p>
+
+            </div>
+
+            <a href="map.html" class="btn btn-white">
+                <i class="fa-solid fa-map-location-dot"></i>
+                Mở bản đồ BinGo
+            </a>
+
+        </div>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<!-- ================= FOOTER ================= -->
+
+<footer>
+
+    <div class="container footer-container">
+
+        <div>
+
+            <a href="#" class="logo footer-logo">
+
+                <span class="logo-icon">
+                    <i class="fa-solid fa-recycle"></i>
+                </span>
+
+                <span>Bin<span>Go</span></span>
+
+            </a>
+
+            <p>
+                Smart Waste Collection Platform
+            </p>
+
+        </div>
+
+
+        <div class="footer-links">
+            <a href="#about">Giới thiệu</a>
+            <a href="#features">Tính năng</a>
+            <a href="#workflow">Hoạt động</a>
+            <a href="map.html">Bản đồ</a>
+        </div>
+
+    </div>
+
+
+    <div class="copyright">
+        © 2026 BinGo. Smart Waste Management Platform.
+    </div>
+
+</footer>
+
+
+<script src="app.js"></script>
+
+</body>
+</html>

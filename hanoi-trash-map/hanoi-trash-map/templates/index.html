@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>BinGo thu gom rác thông minh</title>
+
+    <!-- Leaflet -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+
+<div class="app">
+
+    <!-- ================= HEADER ================= -->
+
+    <header class="topbar">
+
+        <div>
+            <div class="brand">
+                🌿 BinGo
+            </div>
+
+            <div class="subtitle">
+                Thu gom rác thông minh giúp thành phố sạch hơn
+            </div>
+        </div>
+
+        <div class="live-badge">
+            <span class="live-dot"></span>
+            SIMULATION
+        </div>
+
+    </header>
+
+
+    <!-- ================= MAIN ================= -->
+
+    <main class="layout">
+
+        <!-- ================= SIDEBAR ================= -->
+
+        <aside class="sidebar">
+
+            <!-- SIMULATION CONTROL -->
+
+            <section class="control-card">
+
+                <h3>
+                    🎮 Điều khiển mô phỏng
+                </h3>
+
+                <div class="button-row">
+
+                    <button
+                        id="startBtn"
+                        class="btn primary"
+                    >
+                        ▶ Bắt đầu
+                    </button>
+
+                    <button
+                        id="pauseBtn"
+                        class="btn"
+                    >
+                        ⏸ Tạm dừng
+                    </button>
+
+                    <button
+                        id="resetBtn"
+                        class="btn"
+                    >
+                        ↻ Reset
+                    </button>
+
+                </div>
+
+
+                <label class="field-label">
+                    Tốc độ mô phỏng
+                </label>
+
+                <div class="speed-row">
+
+                    <button
+                        class="speed-btn active"
+                        data-speed="1"
+                    >
+                        1×
+                    </button>
+
+                    <button
+                        class="speed-btn"
+                        data-speed="2"
+                    >
+                        2×
+                    </button>
+
+                    <button
+                        class="speed-btn"
+                        data-speed="5"
+                    >
+                        5×
+                    </button>
+
+                    <button
+                        class="speed-btn"
+                        data-speed="10"
+                    >
+                        10×
+                    </button>
+
+                </div>
+
+                <div
+                    id="simulationStatus"
+                    class="sim-status"
+                >
+                    Sẵn sàng bắt đầu
+                </div>
+
+            </section>
+
+
+            <!-- STATISTICS -->
+
+            <section class="stats-grid">
+
+                <div class="stat-card">
+                    <span>Tổng điểm rác</span>
+                    <strong id="totalCount">0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Đã thu gom</span>
+                    <strong id="collectedCount">0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Chờ thu gom</span>
+                    <strong id="waitingCount">0</strong>
+                </div>
+
+                <div class="stat-card">
+                    <span>Xe hoạt động</span>
+                    <strong id="truckCount">0</strong>
+                </div>
+
+            </section>
+
+
+            <!-- FILTER -->
+
+            <section class="control-card">
+
+                <h3>
+                    🔎 Tìm kiếm điểm rác
+                </h3>
+
+                <input
+                    id="searchInput"
+                    class="input"
+                    type="text"
+                    placeholder="Tên, địa chỉ, quận..."
+                >
+
+                <select
+                    id="districtFilter"
+                    class="input"
+                >
+                    <option value="">
+                        Tất cả quận / huyện
+                    </option>
+                </select>
+
+
+                <select
+                    id="typeFilter"
+                    class="input"
+                >
+                    <option value="">
+                        Tất cả loại thùng
+                    </option>
+                </select>
+
+            </section>
+
+
+            <!-- MAP OPTIONS -->
+
+            <section class="control-card">
+
+                <h3>
+                    🗺️ Hiển thị bản đồ
+                </h3>
+
+                <label class="checkbox-row">
+
+                    <input
+                        id="showRoutes"
+                        type="checkbox"
+                        checked
+                    >
+
+                    Hiển thị tuyến thu gom
+
+                </label>
+
+
+                <label class="checkbox-row">
+
+                    <input
+                        id="showTrucks"
+                        type="checkbox"
+                        checked
+                    >
+
+                    Hiển thị xe thu gom
+
+                </label>
+
+            </section>
+
+
+            <!-- LEGEND -->
+
+            <section class="control-card">
+
+                <h3>
+                    Chú thích
+                </h3>
+
+                <div class="legend">
+
+                    <div>
+                        <span class="legend-bin available">🗑</span>
+                        Còn chỗ
+                    </div>
+
+                    <div>
+                        <span class="legend-bin full">🗑</span>
+                        Đầy
+                    </div>
+
+                    <div>
+                        <span class="legend-bin overloaded">🗑</span>
+                        Quá tải
+                    </div>
+
+                    <div>
+                        <span class="legend-bin broken">!</span>
+                        Hỏng
+                    </div>
+
+                    <div>
+                        <span class="legend-line"></span>
+                        Tuyến xe thu gom
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- TRUCKS -->
+
+            <section class="control-card">
+
+                <div class="section-title">
+
+                    <h3>
+                        🚛 Xe thu gom
+                    </h3>
+
+                    <div class="section-actions">
+
+                        <span>
+                            DEMO LIVE
+                        </span>
+
+                        <button
+                            id="toggleTruckList"
+                            class="collapse-btn"
+                            type="button"
+                            aria-expanded="true"
+                        >
+                            Thu gọn
+                        </button>
+
+                    </div>
+
+                </div>
+
+                <div id="truckList"></div>
+
+            </section>
+
+        </aside>
+
+
+        <!-- ================= MAP ================= -->
+
+        <section class="map-area">
+
+            <div class="map-overlay">
+
+                <div class="overlay-title">
+                    🚛 Live Collection Simulation
+                </div>
+
+                <div id="mapTime">
+                    00:00
+                </div>
+
+            </div>
+
+            <div id="map"></div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- Leaflet -->
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+<!-- Application -->
+<script
+    src="{{ url_for('static', filename='app.js') }}">
+</script>
+
+</body>
+
+</html>
