@@ -160,6 +160,10 @@ const binMarkers =
 let running =
     false;
 
+let routesLoading = true;
+const retryRoutesBtn = document.getElementById("retryRoutesBtn");
+const TRUCK_SPEED_KMH = 30;
+
 let timer =
     null;
 
@@ -236,6 +240,13 @@ const trucks = Array.from(
 
             route: [],
             assignedBins: [],
+            orderedBins: [],
+            routeStatus: "pending",
+            routeError: "",
+            stops: [],
+            distanceTravelled: 0,
+            totalDistance: 0,
+            nextStop: 0,
 
             segment: 0,
             progress: 0,
@@ -1058,10 +1069,9 @@ function generateTruckRoutes() {
                     ];
 
 
-            truck.route =
-                buildNearestRoute(
-                    truck.assignedBins
-                );
+            truck.orderedBins = buildNearestRoute(truck.assignedBins);
+            truck.route = [];
+            truck.routeStatus = truck.orderedBins.length ? "pending" : "empty";
 
 
             truck.segment =
@@ -1205,17 +1215,78 @@ function buildNearestRoute(group) {
     }
 
 
-    return ordered.map(
-        item => [
-
-            item.latitude,
-            item.longitude
-
-        ]
-    );
+    // This determines stop order only; road geometry comes from OSRM.
+    return ordered;
 
 }
 
+
+
+function setRouteControls(loading) {
+    routesLoading = loading;
+    const ready = trucks.some(t => t.routeStatus === "ready");
+    startBtn.disabled = loading || !ready;
+    pauseBtn.disabled = loading || !ready;
+    resetBtn.disabled = loading || !ready;
+    retryRoutesBtn.disabled = loading;
+    retryRoutesBtn.hidden = !trucks.some(t => t.routeStatus === "error");
+}
+
+function readyMessage() {
+    const ready = trucks.filter(t => t.routeStatus === "ready").length;
+    const failed = trucks.filter(t => t.routeStatus === "error").length;
+    return failed
+        ? `⚠️ ${ready} tuyến sẵn sàng; ${failed} tuyến lỗi, các xe này chưa thể chạy. Nhấn “Tải lại tuyến lỗi”.`
+        : `Sẵn sàng: ${ready} tuyến chạy theo đường ô tô.`;
+}
+
+async function loadRoadRoutes(onlyFailed = false) {
+    setRouteControls(true);
+    const pending = trucks.filter(t => t.orderedBins.length
+        && (!onlyFailed || t.routeStatus === "error"));
+    // One request at a time; the backend caches and rate-limits the public router.
+    for (const [index, truck] of pending.entries()) {
+        simulationStatus.textContent = `⏳ Đang tìm đường ô tô ${index + 1}/${pending.length} (${truck.id})...`;
+        truck.routeStatus = "loading";
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 25000);
+        try {
+            const response = await fetch("/api/road-route", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({bin_ids: truck.orderedBins.map(b => b.id)}),
+                signal: controller.signal
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || "Không tải được tuyến đường.");
+            RoadRouting.prepare(truck, data);
+            truck.routeStatus = "ready";
+            truck.routeError = "";
+        } catch (error) {
+            truck.route = [];
+            truck.stops = [];
+            truck.routeStatus = "error";
+            truck.routeError = error.name === "AbortError"
+                ? "Tìm đường quá lâu. Hãy thử tải lại tuyến." : error.message;
+            console.warn(`Route ${truck.id} unavailable:`, error);
+        } finally {
+            clearTimeout(timeout);
+        }
+        renderTruckList();
+    }
+    createRoutes();
+    createTruckMarkers();
+    setRouteControls(false);
+    simulationStatus.textContent = readyMessage();
+    updateStats();
+    renderTruckList();
+}
+
+retryRoutesBtn.addEventListener("click", async () => {
+    if (routesLoading) return;
+    pauseSimulation();
+    await loadRoadRoutes(true);
+});
 
 // ============================================================
 // 17. CREATE ROUTES
@@ -1268,6 +1339,8 @@ function createRoutes() {
 
                     opacity:
                         0.80,
+
+                    smoothFactor: 0,
 
                     dashArray:
                         "10 7",
@@ -1407,7 +1480,7 @@ function createTruckMarkers() {
         0;
 
 
-    trucks.forEach(truck => {
+    trucks.forEach((truck, index) => {
 
         if (
             truck.route.length === 0
@@ -1418,8 +1491,9 @@ function createTruckMarkers() {
         }
 
 
-        const first =
-            truck.route[0];
+        const current = truck.route[truck.segment];
+        const next = truck.route[truck.segment + 1] || current;
+        const first = current.map((value, axis) => value + (next[axis] - value) * truck.progress);
 
 
         const marker =
@@ -1482,9 +1556,8 @@ function createTruckMarkers() {
         marker.addTo(map);
 
 
-        truckMarkers.push(
-            marker
-        );
+        // Preserve truck indices when an earlier route failed or has no stops.
+        truckMarkers[index] = marker;
 
     });
 
@@ -1575,335 +1648,24 @@ function markBinCollected(
 
 
 // ============================================================
-// 23. COLLECT NEARBY BINS
+// 23. MOVE ALONG ROAD GEOMETRY AND COLLECT AT ROUTED STOPS
 // ============================================================
 
-function collectNearbyBins(
-    truck,
-    lat,
-    lng
-) {
-
-    // Khoảng 120m để demo
-    const collectionRadius =
-        120;
-
-
-    bins.forEach(item => {
-
-        if (
-            item.demoCollected ||
-            item.status === "broken"
-        ) {
-
-            return;
-
-        }
-
-
-        if (
-            !Number.isFinite(item.latitude) ||
-            !Number.isFinite(item.longitude)
-        ) {
-
-            return;
-
-        }
-
-
-        const distance =
-            distanceMeters(
-
-                lat,
-                lng,
-
-                item.latitude,
-                item.longitude
-
-            );
-
-
-        if (
-            distance <=
-            collectionRadius
-        ) {
-
-            markBinCollected(
-                item,
-                truck
-            );
-
-        }
-
-    });
-
+function moveTruck(truck, marker, meters = TRUCK_SPEED_KMH / 3.6 * speedMultiplier) {
+    if (!marker || truck.routeStatus !== "ready") return;
+    const movement = RoadRouting.advance(truck, meters);
+    if (movement.position) marker.setLatLng(movement.position);
+    movement.reached.forEach(item => markBinCollected(item, truck));
 }
-
-
-// ============================================================
-// 24. COLLECT WAYPOINT
-// ============================================================
-
-function collectWaypointBin(
-    truck,
-    position
-) {
-
-    if (!position) {
-        return;
-    }
-
-
-    let nearestBin =
-        null;
-
-
-    let nearestDistance =
-        Infinity;
-
-
-    truck.assignedBins.forEach(
-        item => {
-
-            if (
-                item.demoCollected ||
-                item.status === "broken"
-            ) {
-
-                return;
-
-            }
-
-
-            const distance =
-                distanceMeters(
-
-                    position[0],
-                    position[1],
-
-                    item.latitude,
-                    item.longitude
-
-                );
-
-
-            if (
-                distance <
-                nearestDistance
-            ) {
-
-                nearestDistance =
-                    distance;
-
-                nearestBin =
-                    item;
-
-            }
-
-        }
-    );
-
-
-    // Waypoint được tạo từ chính điểm rác
-    if (
-        nearestBin &&
-        nearestDistance <= 30
-    ) {
-
-        markBinCollected(
-            nearestBin,
-            truck
-        );
-
-    }
-
-}
-
-
-// ============================================================
-// 25. MOVE TRUCK
-// ============================================================
-
-function moveTruck(
-    truck,
-    marker
-) {
-
-    if (
-        !marker ||
-        truck.route.length < 2
-    ) {
-
-        return;
-
-    }
-
-
-    // Xe đã đến cuối tuyến
-    if (
-        truck.segment >=
-        truck.route.length - 1
-    ) {
-
-        marker.setLatLng(
-
-            truck.route[
-                truck.route.length - 1
-            ]
-
-        );
-
-
-        return;
-
-    }
-
-
-    const current =
-        truck.route[
-            truck.segment
-        ];
-
-
-    const next =
-        truck.route[
-            truck.segment + 1
-        ];
-
-
-    const lat =
-
-        current[0]
-
-        +
-
-        (
-            next[0] -
-            current[0]
-        )
-
-        * truck.progress;
-
-
-    const lng =
-
-        current[1]
-
-        +
-
-        (
-            next[1] -
-            current[1]
-        )
-
-        * truck.progress;
-
-
-    marker.setLatLng(
-        [lat, lng]
-    );
-
-
-    // Thu gom những điểm gần xe
-    collectNearbyBins(
-        truck,
-        lat,
-        lng
-    );
-
-
-    const segmentDistance =
-        Math.max(
-
-            100,
-
-            distanceMeters(
-
-                current[0],
-                current[1],
-
-                next[0],
-                next[1]
-
-            )
-
-        );
-
-
-    // Mỗi tick tương đương khoảng 25m ở 1x
-    const movement =
-        (
-            25 /
-            segmentDistance
-        )
-
-        *
-
-        speedMultiplier;
-
-
-    truck.progress +=
-        movement;
-
-
-    if (
-        truck.progress >= 1
-    ) {
-
-        // Thu chính xác điểm ở cuối segment
-        collectWaypointBin(
-            truck,
-            next
-        );
-
-
-        truck.segment++;
-
-
-        truck.progress =
-            0;
-
-
-        // Đặt marker chính xác vào waypoint
-        marker.setLatLng(
-            next
-        );
-
-
-        if (
-            truck.segment >=
-            truck.route.length - 1
-        ) {
-
-            truck.segment =
-                truck.route.length - 1;
-
-        }
-
-    }
-
-}
-
 
 // ============================================================
 // 26. CHECK TRUCK FINISH
 // ============================================================
 
 function truckFinished(truck) {
-
-    return (
-
-        truck.route.length <= 1
-
-        ||
-
-        truck.segment >=
-        truck.route.length - 1
-
-    );
-
+    return truck.routeStatus !== "ready"
+        || (truck.distanceTravelled >= truck.totalDistance && truck.nextStop >= truck.stops.length);
 }
-
 
 function allTrucksFinished() {
 
@@ -1982,9 +1744,13 @@ function simulationTick() {
 
 function startSimulation() {
 
-    if (running) {
+    if (running || routesLoading || !trucks.some(t => t.routeStatus === "ready")) {
         return;
     }
+
+    // Collect stops at the snapped starting position, including single-stop routes.
+    trucks.forEach((truck, index) => moveTruck(truck, truckMarkers[index], 0));
+    updateStats();
 
 
     if (
@@ -1992,7 +1758,8 @@ function startSimulation() {
     ) {
 
         simulationStatus.textContent =
-            "✅ Đã hoàn thành. Nhấn Reset để chạy lại.";
+            "✅ Các tuyến khả dụng đã hoàn thành. Nhấn Reset để chạy lại.";
+        renderTruckList();
 
         return;
 
@@ -2036,6 +1803,8 @@ function startSimulation() {
 // ============================================================
 
 function pauseSimulation() {
+
+    if (routesLoading) return;
 
     running =
         false;
@@ -2085,7 +1854,9 @@ function finishSimulation() {
 
 
     simulationStatus.textContent =
-        "✅ Hoàn thành các tuyến thu gom";
+        trucks.some(t => t.routeStatus === "error")
+            ? "⚠️ Đã chạy xong các tuyến khả dụng. Còn tuyến lỗi cần tải lại."
+            : "✅ Hoàn thành các tuyến thu gom";
 
 
     updateStats();
@@ -2100,6 +1871,8 @@ function finishSimulation() {
 // ============================================================
 
 function resetSimulation() {
+
+    if (routesLoading) return;
 
     running =
         false;
@@ -2140,6 +1913,7 @@ function resetSimulation() {
     trucks.forEach(
         truck => {
 
+            RoadRouting.reset(truck);
             truck.segment =
                 0;
 
@@ -2178,7 +1952,7 @@ function resetSimulation() {
 
 
     simulationStatus.textContent =
-        "Sẵn sàng bắt đầu";
+        readyMessage();
 
 
     updateStats();
@@ -2250,7 +2024,7 @@ function updateStats() {
     if (truckCount) {
 
         truckCount.textContent =
-            trucks.length;
+            trucks.filter(truck => truck.routeStatus === "ready").length;
 
     }
 
@@ -2274,26 +2048,9 @@ function renderTruckList() {
 
     trucks.forEach(truck => {
 
-        const denominator =
-            Math.max(
-
-                1,
-
-                truck.route.length - 1
-
-            );
-
-
-        let routeProgress =
-
-            (
-                truck.segment +
-                truck.progress
-            )
-
-            /
-
-            denominator;
+        let routeProgress = truck.totalDistance > 0
+            ? truck.distanceTravelled / truck.totalDistance
+            : (truck.routeStatus === "ready" && truckFinished(truck) ? 1 : 0);
 
 
         routeProgress =
@@ -2321,7 +2078,16 @@ function renderTruckList() {
             "IDLE";
 
 
-        if (finished) {
+        if (truck.routeStatus === "error") {
+            status = "LỖI TUYẾN";
+        }
+        else if (truck.routeStatus === "empty") {
+            status = "KHÔNG CÓ ĐIỂM";
+        }
+        else if (truck.routeStatus !== "ready") {
+            status = "ĐANG TẢI";
+        }
+        else if (finished) {
 
             status =
                 "DONE";
@@ -2341,10 +2107,7 @@ function renderTruckList() {
             running &&
             !finished
 
-                ? Math.round(
-                    25 +
-                    speedMultiplier * 2
-                )
+                ? TRUCK_SPEED_KMH
 
                 : 0;
 
@@ -2412,6 +2175,8 @@ function renderTruckList() {
 
             </div>
 
+
+            ${truck.routeError ? `<div class="sim-status">${escapeHtml(truck.routeError)}</div>` : ""}
 
             <div class="progress">
 
@@ -2500,6 +2265,8 @@ document
             "click",
 
             () => {
+
+                if (routesLoading) return;
 
                 document
                     .querySelectorAll(
@@ -2710,26 +2477,20 @@ function fitMapToHanoi() {
 
 async function initialize() {
 
+    setRouteControls(true);
     try {
 
         simulationStatus.textContent =
             "⏳ Đang tải dữ liệu...";
 
 
-        // 1. Load 300 bins
+        // Load bin data.
         await loadBins();
 
 
-        // 2. Generate 3 routes
+        // Assign stops, then resolve actual drivable road geometry.
         generateTruckRoutes();
-
-
-        // 3. Draw routes
-        createRoutes();
-
-
-        // 4. Create trucks
-        createTruckMarkers();
+        await loadRoadRoutes();
 
 
         // 5. Fit map to Hanoi city bounds
@@ -2757,7 +2518,7 @@ async function initialize() {
 
 
         simulationStatus.textContent =
-            "Sẵn sàng bắt đầu";
+            readyMessage();
 
 
         console.log(

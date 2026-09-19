@@ -130,9 +130,16 @@
                 <div
                     id="simulationStatus"
                     class="sim-status"
+                    role="status"
+                    aria-live="polite"
                 >
                     Sẵn sàng bắt đầu
                 </div>
+
+                <button id="retryRoutesBtn" class="btn" type="button" hidden>
+                    Tải lại tuyến lỗi
+                </button>
+                <p class="subtitle">Tuyến ô tô: OpenStreetMap / OSRM. Điểm thu gom và xe vẫn là mô phỏng.</p>
 
             </section>
 
@@ -344,6 +351,7 @@
 </script>
 
 <!-- Application -->
+<script src="{{ url_for('static', filename='road-routing.js') }}"></script>
 <script
     src="{{ url_for('static', filename='app.js') }}">
 </script>
