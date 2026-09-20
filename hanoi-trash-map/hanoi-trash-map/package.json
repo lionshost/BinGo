@@ -1,0 +1,32 @@
+{
+  "name": "bingo-trash-map",
+  "version": "1.0.0",
+  "description": "BinGo · Mỗi chuyến xe, thêm một góc xanh - Nền tảng điều phối thu gom rác thông minh với Node.js và Tailwind CSS v4",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "server": "node server/server.js",
+    "start": "node server/server.js",
+    "test": "node --test tests/road-routing.test.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.9",
+    "tailwindcss": "^4.0.9",
+    "vite": "^6.2.0"
+  },
+  "keywords": [
+    "bingo",
+    "smart-city",
+    "vietmap",
+    "leaflet",
+    "tailwindcss",
+    "nodejs"
+  ],
+  "author": "BinGo Team",
+  "license": "MIT"
+}

@@ -1,6 +1,6 @@
-const {test} = require('node:test');
-const assert = require('node:assert/strict');
-const road = require('../static/road-routing.js');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import * as road from '../src/js/road-routing.js';
 
 function fixture() {
     const truck = {orderedBins: [{id: 'a'}, {id: 'b'}, {id: 'c'}]};
@@ -15,10 +15,19 @@ test('truck turns at the road bend rather than interpolating between bins', () =
     const truck = fixture();
     const first = road.advance(truck, 0);
     assert.deepEqual(first.reached.map(b => b.id), ['a']);
+    assert.ok(typeof first.bearing === 'number');
     const move = road.advance(truck, truck.cumulative[1] + 3);
     assert.equal(move.position[1], 105.8001);
     assert.ok(move.position[0] > 21 && move.position[0] < 21.0001);
     assert.deepEqual(move.reached, []);
+    assert.ok(Math.abs(move.bearing - 0) < 1, 'heading should be North along the second road segment');
+});
+
+test('bearing calculates accurate cardinal directions', () => {
+    assert.ok(Math.abs(road.bearing([21.0, 105.0], [21.01, 105.0]) - 0) < 0.1, 'North is ~0 deg');
+    assert.ok(Math.abs(road.bearing([21.0, 105.0], [21.0, 105.01]) - 90) < 0.1, 'East is ~90 deg');
+    assert.ok(Math.abs(road.bearing([21.0, 105.0], [20.99, 105.0]) - 180) < 0.1, 'South is ~180 deg');
+    assert.ok(Math.abs(road.bearing([21.0, 105.0], [21.0, 104.99]) - 270) < 0.1, 'West is ~270 deg');
 });
 
 test('high speed crosses short segments and collects every reached stop once', () => {
