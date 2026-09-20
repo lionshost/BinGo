@@ -5,8 +5,11 @@ from pathlib import Path
 
 
 def get_settings():
-    local_path = Path(__file__).parent / "config.local.json"
-    local = json.loads(local_path.read_text(encoding="utf-8")) if local_path.exists() else {}
+    config_dir = Path(__file__).parent
+    local_path = config_dir / "config.local.json"
+    fallback_path = config_dir / "config.json"
+    config_path = local_path if local_path.exists() else fallback_path
+    local = json.loads(config_path.read_text(encoding="utf-8")) if config_path.exists() else {}
     def value(name, default=""):
         return os.environ.get(name, local.get(name, default))
     return {

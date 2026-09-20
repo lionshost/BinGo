@@ -66,8 +66,9 @@ def _convert(payload, bins, vehicle):
     snapped = decode_polyline(path.get("snapped_waypoints"))
     if len(snapped) != len(bins):
         raise RoutingError("VIETMAP trả thiếu điểm dừng trên đường.")
-    # Via-arrival instructions disambiguate loops and self-crossings.
-    via_indices = []
+    # Validate via-arrival instructions; waypoint geometry is the authoritative
+    # location because provider instruction intervals can use a different index.
+    via_hints = []
     instructions = path.get("instructions", [])
     if not isinstance(instructions, list):
         raise RoutingError("Thiếu hướng dẫn tuyến VIETMAP.")
@@ -78,12 +79,26 @@ def _convert(payload, bins, vehicle):
             interval = instruction.get("interval", [])
             if not isinstance(interval, list) or len(interval) != 2:
                 raise RoutingError("Thiếu chỉ số điểm dừng VIETMAP.")
-            via_indices.append(interval[0])
-    indices = [0, *via_indices, len(geometry) - 1]
+            if isinstance(interval[0], bool) or not isinstance(interval[0], int):
+                raise RoutingError("Chỉ số điểm dừng VIETMAP không hợp lệ.")
+            via_hints.append(interval[0])
+    if len(via_hints) != len(bins) - 2:
+        raise RoutingError("Thiếu hướng dẫn ghé điểm trung gian; chưa thể xác định điểm thu gom.")
+
+    indices = [0]
+    previous = 0
+    for location, hint in zip(snapped[1:-1], via_hints):
+        index = min(
+            range(max(previous, hint), len(geometry)),
+            key=lambda candidate: distance(location, geometry[candidate])
+        )
+        indices.append(index)
+        previous = index
+    indices.append(len(geometry) - 1)
     if len(indices) != len(bins):
         raise RoutingError("Thiếu hướng dẫn ghé điểm trung gian; chưa thể xác định điểm thu gom.")
-    previous = 0
     stops = []
+    previous = -1
     for item, location, index in zip(bins, snapped, indices):
         if isinstance(index, bool) or not isinstance(index, int) or not previous <= index < len(geometry):
             raise RoutingError("Thứ tự điểm dừng VIETMAP không hợp lệ.")
