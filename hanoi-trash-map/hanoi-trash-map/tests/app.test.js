@@ -8,7 +8,7 @@ const RoadRouting = require('../static/road-routing.js');
 function appFixture() {
     const elements = new Map();
     const element = () => ({value: '', checked: true, options: [{}], textContent: '',
-        style: {}, classList: {add() {}, remove() {}}, addEventListener() {},
+        style: {setProperty() {}}, classList: {add() {}, remove() {}, toggle() {}}, addEventListener() {},
         appendChild() {}, setAttribute() {}, remove() {}});
     const layers = new Set();
     const map = {hasLayer: l => layers.has(l), removeLayer: l => layers.delete(l),
@@ -20,7 +20,14 @@ function appFixture() {
     }
     const sandbox = {RoadRouting, AbortController, console: {log() {}, warn() {}, error() {}},
         setTimeout: () => 1, clearTimeout() {}, setInterval: () => 1, clearInterval() {},
-        document: {getElementById(id) {if (!elements.has(id)) elements.set(id, element()); return elements.get(id);},
+        document: {getElementById(id) {
+            if (!elements.has(id)) {
+                const node = element();
+                if (id === 'mapConfig') node.textContent = JSON.stringify({tilemapKey:'test',routingConfigured:true});
+                elements.set(id, node);
+            }
+            return elements.get(id);
+        },
             querySelectorAll: () => [], createElement: element},
         L: {latLngBounds() {}, map: () => map, tileLayer: () => layer(),
             marker: layer, divIcon: () => ({}), polyline: layer},
@@ -30,6 +37,7 @@ function appFixture() {
     vm.runInContext(source.replace(/initialize\(\);\s*$/, ''), context);
     const run = code => vm.runInContext(code, context);
     run(`
+        mapReady = true;
         bins = ['a','b','c','d'].map((id, index) => ({id, latitude:21, longitude:105.8 + index/1000, status:'active'}));
         trucks.splice(2);
         trucks.forEach((truck, i) => {
@@ -46,6 +54,58 @@ function response(ids, fail = false) {
         stops: ids.map((id,i) => ({bin_id:id, route_index:i*2}))
     }};
 }
+
+test('missing tile key disables map and never requests road routes', async () => {
+    const {run, elements} = appFixture();
+    run('providerConfig.tilemapKey = ""; mapReady = false');
+    assert.equal(await run('initializeVietmap()'), false);
+    await run('loadRoadRoutes()');
+    run('setRouteControls(false); startSimulation()');
+    assert.equal(run('running'), false);
+    assert.equal(elements.get('loadRoutesBtn').disabled, true);
+    assert.equal(elements.get('map').inert, true);
+});
+
+test('page initialization does not spend routing quota', async () => {
+    const {run, context} = appFixture();
+    let calls = 0;
+    context.fetch = async () => { calls++; throw Error('unexpected routing request'); };
+    run(`
+        loadBins = async () => {};
+        generateTruckRoutes = () => {};
+        fitMapToHanoi = () => {};
+        initializeVietmap = async () => true;
+    `);
+    await run('initialize()');
+    assert.equal(calls, 0);
+});
+
+test('missing services configuration prevents route requests', async () => {
+    const {run, elements} = appFixture();
+    run('providerConfig.routingConfigured = false');
+    await run('loadRoadRoutes()');
+    run('setRouteControls(false)');
+    assert.equal(elements.get('loadRoutesBtn').disabled, true);
+    assert.equal(run('trucks.some(t => t.routeStatus === "ready")'), false);
+});
+
+test('VIETMAP SDK load enables map; authentication failure blocks it again', async () => {
+    const {run, context, elements} = appFixture();
+    const handlers = {};
+    context.L.vietmapGL = () => ({
+        addTo() { return this; },
+        getVietmapMap() { return {on(event, callback) { handlers[event] = callback; }}; }
+    });
+    const loading = run('initializeVietmap()');
+    handlers.load();
+    assert.equal(await loading, true);
+    assert.equal(run('mapReady'), true);
+    assert.equal(elements.get('mapPlaceholder').hidden, true);
+    handlers.error({error:{status:403}});
+    assert.equal(run('mapReady'), false);
+    assert.equal(elements.get('mapPlaceholder').hidden, false);
+    assert.equal(elements.get('startBtn').disabled, true);
+});
 
 test('failed first route keeps marker ownership, retry preserves other truck progress', async () => {
     const {context, run, elements} = appFixture();

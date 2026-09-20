@@ -3,6 +3,7 @@ from pathlib import Path
 import json
 import math
 from routing import MAX_STOPS, RoutingError, road_route
+from settings import public_config
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_FILE = BASE_DIR / "data" / "trash_bins.json"
@@ -24,7 +25,12 @@ def load_bins():
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    return render_template("index.html", map_config=public_config())
+
+
+@app.get("/api/map-config")
+def map_config():
+    return jsonify(public_config())
 
 
 @app.route("/api/trash-bins")

@@ -27,68 +27,77 @@ const map = L.map("map", {
 
 
 // ============================================================
-// 2. BASE MAP
-// Esri primary + OSM.DE fallback
+// 2. VIETMAP VECTOR BASE MAP
 // ============================================================
 
-let fallbackActivated = false;
+const providerConfig = JSON.parse(document.getElementById("mapConfig").textContent);
+let mapReady = false;
+let vietmapLayer = null;
+let statusFilter = "all";
 
-const esriMap = L.tileLayer(
-    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-    {
-        maxZoom: 19,
-        attribution: "Tiles &copy; Esri"
+function showMapState(message) {
+    document.getElementById("map").inert = true;
+    document.getElementById("mapPlaceholder").hidden = false;
+    document.getElementById("mapStateText").textContent = message;
+    document.getElementById("providerStatus").textContent = "VIETMAP · Chưa kết nối";
+    document.getElementById("mapCaption").textContent = "Chưa kết nối nguồn bản đồ";
+}
+
+async function initializeVietmap(style = "lm") {
+    mapReady = false;
+    if (!providerConfig.tilemapKey) {
+        showMapState("Kết nối tài khoản VIETMAP để mở bản đồ và tìm tuyến đường cho đội xe của bạn.");
+        return false;
     }
-);
-
-esriMap.addTo(map);
-
-
-// Nếu Esri không tải được -> thử OSM Germany
-esriMap.on("tileerror", function (event) {
-
-    console.error("Esri tile failed:", event);
-
-    if (fallbackActivated) {
-        return;
+    if (!L.vietmapGL) {
+        showMapState("Chưa tải được thư viện bản đồ VIETMAP. Kiểm tra kết nối mạng rồi tải lại trang.");
+        return false;
     }
-
-    fallbackActivated = true;
-
-    console.warn(
-        "Esri failed. Switching to OpenStreetMap.DE..."
-    );
-
-    if (map.hasLayer(esriMap)) {
-        map.removeLayer(esriMap);
+    document.getElementById("providerStatus").textContent = "VIETMAP · Đang kết nối";
+    try {
+        if (vietmapLayer) map.removeLayer(vietmapLayer);
+        vietmapLayer = L.vietmapGL({
+            style: `https://maps.vietmap.vn/maps/styles/${style}/style.json?apikey=${encodeURIComponent(providerConfig.tilemapKey)}`
+        }).addTo(map);
+        const gl = vietmapLayer.getVietmapMap();
+        return await new Promise(resolve => {
+            let settled = false;
+            const finish = value => {
+                if (!settled) { settled = true; clearTimeout(timeout); resolve(value); }
+            };
+            const timeout = setTimeout(() => {
+                showMapState("Kết nối VIETMAP quá lâu. Kiểm tra Tilemap key, tên miền được cấp phép hoặc mạng.");
+                finish(false);
+            }, 18000);
+            gl.on("load", () => {
+                if (settled) return;
+                mapReady = true;
+                document.getElementById("map").inert = false;
+                document.getElementById("mapPlaceholder").hidden = true;
+                document.getElementById("providerStatus").textContent = "VIETMAP · Đã kết nối";
+                document.getElementById("mapCaption").textContent = "Bản đồ VIETMAP";
+                finish(true);
+            });
+            gl.on("error", event => {
+                // Never log raw provider URLs because they include a key.
+                if (!settled || [401, 403, 423].includes(event.error?.status)) {
+                    mapReady = false;
+                    if (running) pauseSimulation();
+                    showMapState("Không tải được VIETMAP. Kiểm tra Tilemap key, quyền truy cập và hạn mức.");
+                    setRouteControls(false);
+                    finish(false);
+                }
+            });
+        });
+    } catch {
+        showMapState("Trình duyệt chưa mở được bản đồ VIETMAP. Kiểm tra WebGL và kết nối mạng.");
+        return false;
     }
-
-    const fallbackMap = L.tileLayer(
-        "https://tile.openstreetmap.de/{z}/{x}/{y}.png",
-        {
-            maxZoom: 19,
-            attribution: "&copy; OpenStreetMap contributors"
-        }
-    );
-
-    fallbackMap.addTo(map);
-
-    fallbackMap.on("tileerror", function (fallbackError) {
-        console.error(
-            "Fallback map tile failed:",
-            fallbackError
-        );
-    });
-
-});
-
-
-setTimeout(() => {
-    map.invalidateSize(true);
-}, 300);
+}
 
 
 // ============================================================
+
 // 3. DOM
 // ============================================================
 
@@ -161,6 +170,7 @@ let running =
     false;
 
 let routesLoading = true;
+const loadRoutesBtn = document.getElementById("loadRoutesBtn");
 const retryRoutesBtn = document.getElementById("retryRoutesBtn");
 const TRUCK_SPEED_KMH = 30;
 
@@ -524,8 +534,13 @@ function filteredBins() {
             item.type === type;
 
 
+        const statusMatch = statusFilter === "all"
+            || (statusFilter === "collected" && item.demoCollected)
+            || (statusFilter === "priority" && !item.demoCollected && ["full", "overloaded"].includes(item.status))
+            || (statusFilter === "broken" && item.status === "broken");
+
         return (
-            keywordMatch &&
+            statusMatch && keywordMatch &&
             districtMatch &&
             typeMatch
         );
@@ -540,6 +555,8 @@ function filteredBins() {
 // ============================================================
 
 function getBinStatus(item) {
+
+    if (item.demoCollected) return {key: "collected", label: "Đã thu gom", icon: "✓"};
 
     const statuses = {
 
@@ -826,6 +843,8 @@ function refreshBinVisibility() {
     });
 
 
+    const visibleCount = document.getElementById("visibleCount");
+    if (visibleCount) visibleCount.textContent = visibleIds.size;
     updateRouteVisibility();
 
     updateTruckVisibility();
@@ -1215,7 +1234,7 @@ function buildNearestRoute(group) {
     }
 
 
-    // This determines stop order only; road geometry comes from OSRM.
+    // This determines stop order only; road geometry comes from VIETMAP.
     return ordered;
 
 }
@@ -1225,15 +1244,19 @@ function buildNearestRoute(group) {
 function setRouteControls(loading) {
     routesLoading = loading;
     const ready = trucks.some(t => t.routeStatus === "ready");
-    startBtn.disabled = loading || !ready;
-    pauseBtn.disabled = loading || !ready;
+    startBtn.disabled = loading || !ready || !mapReady;
+    pauseBtn.disabled = loading || !ready || !mapReady;
     resetBtn.disabled = loading || !ready;
-    retryRoutesBtn.disabled = loading;
+    retryRoutesBtn.disabled = loading || !mapReady || !providerConfig.routingConfigured;
     retryRoutesBtn.hidden = !trucks.some(t => t.routeStatus === "error");
+    loadRoutesBtn.disabled = loading || !mapReady || !providerConfig.routingConfigured;
+    loadRoutesBtn.hidden = ready || trucks.some(t => t.routeStatus === "error");
 }
 
 function readyMessage() {
+    if (!mapReady || !providerConfig.routingConfigured) return "Kết nối VIETMAP để tải tuyến cho đội xe.";
     const ready = trucks.filter(t => t.routeStatus === "ready").length;
+    if (!ready && !trucks.some(t => t.routeStatus === "error")) return "Bản đồ đã sẵn sàng. Nhấn “Tải tuyến VIETMAP” để bắt đầu.";
     const failed = trucks.filter(t => t.routeStatus === "error").length;
     return failed
         ? `⚠️ ${ready} tuyến sẵn sàng; ${failed} tuyến lỗi, các xe này chưa thể chạy. Nhấn “Tải lại tuyến lỗi”.`
@@ -1241,12 +1264,20 @@ function readyMessage() {
 }
 
 async function loadRoadRoutes(onlyFailed = false) {
+    if (!mapReady || !providerConfig.routingConfigured || running) return;
     setRouteControls(true);
     const pending = trucks.filter(t => t.orderedBins.length
         && (!onlyFailed || t.routeStatus === "error"));
-    // One request at a time; the backend caches and rate-limits the public router.
+    // Load on explicit user action. Requests may consume the VIETMAP plan quota.
     for (const [index, truck] of pending.entries()) {
-        simulationStatus.textContent = `⏳ Đang tìm đường ô tô ${index + 1}/${pending.length} (${truck.id})...`;
+        if (!mapReady) {
+            pending.slice(index).forEach(t => {
+                t.routeStatus = "error";
+                t.routeError = "Kết nối bản đồ bị gián đoạn. Hãy tải lại tuyến.";
+            });
+            break;
+        }
+        simulationStatus.textContent = `Đang tải tuyến VIETMAP ${index + 1}/${pending.length} · ${truck.id}`;
         truck.routeStatus = "loading";
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 25000);
@@ -1260,6 +1291,7 @@ async function loadRoadRoutes(onlyFailed = false) {
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || "Không tải được tuyến đường.");
             RoadRouting.prepare(truck, data);
+            document.getElementById("routeUpdated").textContent = `Tuyến cập nhật ${new Date().toLocaleTimeString("vi-VN", {hour:"2-digit", minute:"2-digit"})}`;
             truck.routeStatus = "ready";
             truck.routeError = "";
         } catch (error) {
@@ -1286,6 +1318,10 @@ retryRoutesBtn.addEventListener("click", async () => {
     if (routesLoading) return;
     pauseSimulation();
     await loadRoadRoutes(true);
+});
+
+loadRoutesBtn.addEventListener("click", () => {
+    if (!routesLoading) loadRoadRoutes();
 });
 
 // ============================================================
@@ -1436,9 +1472,7 @@ function createTruckIcon(truck) {
                     "
                 ></div>
 
-                <div class="truck-icon">
-                    🚛
-                </div>
+                <div class="truck-icon"><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg></div>
 
             </div>
 
@@ -1525,7 +1559,7 @@ function createTruckMarkers() {
             <div style="min-width:190px">
 
                 <strong>
-                    🚛 ${truck.name}
+                    <svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg> ${truck.name}
                 </strong>
 
                 <div>
@@ -1725,6 +1759,7 @@ function simulationTick() {
     renderTruckList();
 
     updateClock();
+    if (statusFilter !== "all") refreshBinVisibility();
 
 
     if (
@@ -1744,7 +1779,7 @@ function simulationTick() {
 
 function startSimulation() {
 
-    if (running || routesLoading || !trucks.some(t => t.routeStatus === "ready")) {
+    if (running || routesLoading || !mapReady || !trucks.some(t => t.routeStatus === "ready")) {
         return;
     }
 
@@ -1960,6 +1995,7 @@ function resetSimulation() {
     renderTruckList();
 
     updateClock();
+    refreshBinVisibility();
 
 }
 
@@ -1969,6 +2005,15 @@ function resetSimulation() {
 // ============================================================
 
 function updateStats() {
+
+    const done = bins.filter(b => b.demoCollected).length;
+    const serviceable = bins.filter(b => b.status !== "broken").length;
+    const percent = serviceable ? Math.round(done / serviceable * 100) : 0;
+    document.getElementById("missionPercent").innerHTML = `${percent}<small>%</small>`;
+    document.getElementById("missionRing").style.setProperty("--progress", `${percent}%`);
+    document.getElementById("missionText").textContent = done ? `${done} điểm sạch hơn nhờ đội xe của bạn` : "Sẵn sàng cho hành trình mới";
+    document.getElementById("completionLabel").textContent = `${percent}% hành trình hoàn thành`;
+    document.getElementById("fleetSummary").textContent = `${trucks.length} xe được phân công`;
 
     const total =
         bins.length;
@@ -2035,15 +2080,13 @@ function updateStats() {
 // 33. TRUCK DASHBOARD
 // ============================================================
 
+const truckCards = new Map();
+
 function renderTruckList() {
 
     if (!truckList) {
         return;
     }
-
-
-    truckList.innerHTML =
-        "";
 
 
     trucks.forEach(truck => {
@@ -2075,7 +2118,7 @@ function renderTruckList() {
 
 
         let status =
-            "IDLE";
+            "SẴN SÀNG";
 
 
         if (truck.routeStatus === "error") {
@@ -2085,19 +2128,19 @@ function renderTruckList() {
             status = "KHÔNG CÓ ĐIỂM";
         }
         else if (truck.routeStatus !== "ready") {
-            status = "ĐANG TẢI";
+            status = truck.routeStatus === "loading" ? "ĐANG TẢI" : "CHỜ TUYẾN";
         }
         else if (finished) {
 
             status =
-                "DONE";
+                "HOÀN TẤT";
 
         }
 
         else if (running) {
 
             status =
-                "LIVE";
+                "ĐANG CHẠY";
 
         }
 
@@ -2116,14 +2159,24 @@ function renderTruckList() {
             truck.assignedBins.length;
 
 
-        const item =
-            document.createElement(
-                "div"
-            );
-
-
-        item.className =
-            "truck-item";
+        let item = truckCards.get(truck.id);
+        if (!item) {
+        item = document.createElement("div");
+        truckCards.set(truck.id, item);
+        item.className = "truck-item";
+        item.tabIndex = 0;
+        item.setAttribute("role", "button");
+        item.setAttribute("aria-label", `Xem ${truck.name} trên bản đồ`);
+        const focusTruck = () => {
+            if (!mapReady || !truck.route.length) { simulationStatus.textContent = `${truck.name}: chưa có tuyến để xem.`; return; }
+            const marker = truckMarkers[trucks.indexOf(truck)];
+            if (marker) { map.setView(marker.getLatLng(), 16); marker.openPopup(); }
+            document.querySelector(".map-card").scrollIntoView({behavior:"smooth", block:"start"});
+        };
+        item.addEventListener("click", focusTruck);
+        item.addEventListener("keydown", event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); focusTruck(); } });
+        truckList.appendChild(item);
+        }
 
 
         item.innerHTML = `
@@ -2192,9 +2245,6 @@ function renderTruckList() {
         `;
 
 
-        truckList.appendChild(
-            item
-        );
 
     });
 
@@ -2277,6 +2327,7 @@ document
                         btn.classList.remove(
                             "active"
                         );
+                        btn.setAttribute("aria-pressed", "false");
 
                     });
 
@@ -2284,6 +2335,7 @@ document
                 button.classList.add(
                     "active"
                 );
+                button.setAttribute("aria-pressed", "true");
 
 
                 speedMultiplier =
@@ -2488,9 +2540,12 @@ async function initialize() {
         await loadBins();
 
 
-        // Assign stops, then resolve actual drivable road geometry.
+        // Prepare assignments, but do not spend routing quota on page load.
         generateTruckRoutes();
-        await loadRoadRoutes();
+        renderTruckList();
+        refreshBinVisibility();
+        await initializeVietmap();
+        setRouteControls(false);
 
 
         // 5. Fit map to Hanoi city bounds
@@ -2588,5 +2643,42 @@ async function initialize() {
 // ============================================================
 // START APPLICATION
 // ============================================================
+
+
+const setupDialog = document.getElementById("setupDialog");
+["helpBtn", "connectMapBtn"].forEach(id => document.getElementById(id).addEventListener("click", () => setupDialog.showModal()));
+document.getElementById("closeSetupBtn").addEventListener("click", () => setupDialog.close());
+setupDialog.addEventListener("click", event => { if (event.target === setupDialog) {
+    const bounds = setupDialog.getBoundingClientRect();
+    if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) setupDialog.close();
+}});
+document.getElementById("fleetTab").addEventListener("click", () => {
+    document.getElementById("fleetPanel").scrollIntoView({behavior:"smooth", block:"start"});
+    document.getElementById("fleetPanel").focus({preventScroll:true});
+});
+document.getElementById("mapTab").addEventListener("click", () => document.querySelector(".map-card").scrollIntoView({behavior:"smooth", block:"start"}));
+document.getElementById("centerMapBtn").addEventListener("click", fitMapToHanoi);
+document.getElementById("layerBtn").addEventListener("click", event => {
+    const panel = document.getElementById("layerPanel");
+    panel.hidden = !panel.hidden;
+    event.currentTarget.setAttribute("aria-expanded", String(!panel.hidden));
+});
+document.getElementById("mapStyle").addEventListener("change", async event => {
+    if (!providerConfig.tilemapKey || routesLoading) return;
+    pauseSimulation();
+    setRouteControls(true);
+    await initializeVietmap(event.target.value);
+    setRouteControls(false);
+    simulationStatus.textContent = readyMessage();
+});
+document.querySelectorAll("[data-filter]").forEach(button => button.addEventListener("click", () => {
+    statusFilter = button.dataset.filter;
+    document.querySelectorAll("[data-filter]").forEach(chip => {
+        const active = chip === button;
+        chip.classList.toggle("active", active);
+        chip.setAttribute("aria-pressed", String(active));
+    });
+    refreshBinVisibility();
+}));
 
 initialize();
