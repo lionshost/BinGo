@@ -1,37 +1,78 @@
-const {test} = require('node:test');
-const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const path = require('node:path');
-const vm = require('node:vm');
-const RoadRouting = require('../static/road-routing.js');
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
+import RoadRouting from '../src/js/road-routing.js';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 function appFixture() {
     const elements = new Map();
-    const element = () => ({value: '', checked: true, options: [{}], textContent: '',
-        style: {setProperty() {}}, classList: {add() {}, remove() {}, toggle() {}}, addEventListener() {},
-        appendChild() {}, setAttribute() {}, remove() {}});
+    const element = () => ({
+        value: '',
+        checked: true,
+        options: [{}],
+        textContent: '',
+        style: { setProperty() {} },
+        classList: { add() {}, remove() {}, toggle() {} },
+        addEventListener() {},
+        appendChild() {},
+        setAttribute() {},
+        remove() {}
+    });
     const layers = new Set();
-    const map = {hasLayer: l => layers.has(l), removeLayer: l => layers.delete(l),
-        invalidateSize() {}, setView() {}};
+    const map = {
+        hasLayer: l => layers.has(l),
+        removeLayer: l => layers.delete(l),
+        invalidateSize() {},
+        setView() {}
+    };
     function layer(position) {
-        return {position, addTo() {layers.add(this); return this;},
-            remove() {layers.delete(this);}, on() {}, bindPopup() {},
-            setLatLng(p) {this.position = p;}, setIcon() {}, setPopupContent() {}};
+        return {
+            position,
+            addTo() { layers.add(this); return this; },
+            remove() { layers.delete(this); },
+            on() {},
+            bindPopup() {},
+            setLatLng(p) { this.position = p; },
+            setIcon() {},
+            setPopupContent() {}
+        };
     }
-    const sandbox = {RoadRouting, AbortController, console: {log() {}, warn() {}, error() {}},
-        setTimeout: () => 1, clearTimeout() {}, setInterval: () => 1, clearInterval() {},
-        document: {getElementById(id) {
-            if (!elements.has(id)) {
-                const node = element();
-                if (id === 'mapConfig') node.textContent = JSON.stringify({tilemapKey:'test',routingConfigured:true});
-                elements.set(id, node);
-            }
-            return elements.get(id);
+    const sandbox = {
+        RoadRouting,
+        AbortController,
+        console: { log() {}, warn() {}, error() {} },
+        setTimeout: () => 1,
+        clearTimeout() {},
+        setInterval: () => 1,
+        clearInterval() {},
+        document: {
+            getElementById(id) {
+                if (!elements.has(id)) {
+                    const node = element();
+                    if (id === 'mapConfig') {
+                        node.textContent = JSON.stringify({ tilemapKey: 'test', routingConfigured: true });
+                    }
+                    elements.set(id, node);
+                }
+                return elements.get(id);
+            },
+            querySelectorAll: () => [],
+            createElement: element
         },
-            querySelectorAll: () => [], createElement: element},
-        L: {latLngBounds() {}, map: () => map, tileLayer: () => layer(),
-            marker: layer, divIcon: () => ({}), polyline: layer},
-        fetch: async () => {throw Error('unconfigured fetch');}};
+        L: {
+            latLngBounds() {},
+            map: () => map,
+            tileLayer: () => layer(),
+            marker: layer,
+            divIcon: () => ({}),
+            polyline: layer
+        },
+        fetch: async () => { throw Error('unconfigured fetch'); }
+    };
     const context = vm.createContext(sandbox);
     const source = fs.readFileSync(path.join(__dirname, '../static/app.js'), 'utf8');
     vm.runInContext(source.replace(/initialize\(\);\s*$/, ''), context);
@@ -45,18 +86,24 @@ function appFixture() {
             truck.orderedBins = truck.assignedBins;
         });
     `);
-    return {context, run, elements};
+    return { context, run, elements };
 }
 
 function response(ids, fail = false) {
-    return {ok: !fail, json: async () => fail ? {error: 'offline'} : {
-        geometry: [[21,105.8], [21,105.8001], [21.0001,105.8001]],
-        stops: ids.map((id,i) => ({bin_id:id, route_index:i*2}))
-    }};
+    return {
+        ok: !fail,
+        json: async () =>
+            fail
+                ? { error: 'offline' }
+                : {
+                      geometry: [[21, 105.8], [21, 105.8001], [21.0001, 105.8001]],
+                      stops: ids.map((id, i) => ({ bin_id: id, route_index: i * 2 }))
+                  }
+    };
 }
 
 test('missing tile key disables map and never requests road routes', async () => {
-    const {run, elements} = appFixture();
+    const { run, elements } = appFixture();
     run('providerConfig.tilemapKey = ""; mapReady = false');
     assert.equal(await run('initializeVietmap()'), false);
     await run('loadRoadRoutes()');
@@ -67,9 +114,12 @@ test('missing tile key disables map and never requests road routes', async () =>
 });
 
 test('page initialization does not spend routing quota', async () => {
-    const {run, context} = appFixture();
+    const { run, context } = appFixture();
     let calls = 0;
-    context.fetch = async () => { calls++; throw Error('unexpected routing request'); };
+    context.fetch = async () => {
+        calls++;
+        throw Error('unexpected routing request');
+    };
     run(`
         loadBins = async () => {};
         generateTruckRoutes = () => {};
@@ -81,7 +131,7 @@ test('page initialization does not spend routing quota', async () => {
 });
 
 test('missing services configuration prevents route requests', async () => {
-    const {run, elements} = appFixture();
+    const { run, elements } = appFixture();
     run('providerConfig.routingConfigured = false');
     await run('loadRoadRoutes()');
     run('setRouteControls(false)');
@@ -90,25 +140,29 @@ test('missing services configuration prevents route requests', async () => {
 });
 
 test('VIETMAP SDK load enables map; authentication failure blocks it again', async () => {
-    const {run, context, elements} = appFixture();
+    const { run, context, elements } = appFixture();
     const handlers = {};
     context.L.vietmapGL = () => ({
         addTo() { return this; },
-        getVietmapMap() { return {on(event, callback) { handlers[event] = callback; }}; }
+        getVietmapMap() {
+            return {
+                on(event, callback) { handlers[event] = callback; }
+            };
+        }
     });
     const loading = run('initializeVietmap()');
     handlers.load();
     assert.equal(await loading, true);
     assert.equal(run('mapReady'), true);
     assert.equal(elements.get('mapPlaceholder').hidden, true);
-    handlers.error({error:{status:403}});
+    handlers.error({ error: { status: 403 } });
     assert.equal(run('mapReady'), false);
     assert.equal(elements.get('mapPlaceholder').hidden, false);
     assert.equal(elements.get('startBtn').disabled, true);
 });
 
 test('failed first route keeps marker ownership, retry preserves other truck progress', async () => {
-    const {context, run, elements} = appFixture();
+    const { context, run, elements } = appFixture();
     context.fetch = async (_, options) => {
         const ids = JSON.parse(options.body).bin_ids;
         return response(ids, ids[0] === 'a');
@@ -140,7 +194,7 @@ test('failed first route keeps marker ownership, retry preserves other truck pro
 });
 
 test('loading and all-failed states prevent starting without road geometry', async () => {
-    const {context, run, elements} = appFixture();
+    const { context, run, elements } = appFixture();
     run('setRouteControls(true); startSimulation()');
     assert.equal(run('running'), false);
     assert.equal(elements.get('startBtn').disabled, true);

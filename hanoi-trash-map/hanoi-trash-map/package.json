@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "server": "node server/server.js",
     "start": "node server/server.js",
-    "test": "node --test tests/road-routing.test.js"
+    "test": "node --test tests/road-routing.test.js tests/app.test.js tests/server-routing.test.js"
   },
   "dependencies": {
     "express": "^4.21.2"
