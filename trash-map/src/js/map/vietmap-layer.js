@@ -83,16 +83,26 @@ export async function initializeVietmap(map, style = "lm", onRouteControlsUpdate
             const finish = ok => {
                 if (settled) return;
                 settled = true;
+                clearTimeout(timeout);
                 resolve(ok);
             };
 
-            const gl = vietmapLayer.getVietmapGL();
+            const timeout = setTimeout(() => {
+                showMapState("Kết nối VIETMAP quá lâu. Kiểm tra Tilemap key, tên miền được cấp phép hoặc mạng.");
+                finish(false);
+            }, 18000);
+
+            const gl = typeof vietmapLayer.getVietmapMap === "function"
+                ? vietmapLayer.getVietmapMap()
+                : (typeof vietmapLayer.getVietmapGL === "function" ? vietmapLayer.getVietmapGL() : null);
+
             if (!gl) {
+                console.error("Vietmap GL instance could not be retrieved from layer");
                 showMapState("Không thể khởi tạo WebGL VIETMAP.");
                 return finish(false);
             }
 
-            gl.once("load", () => {
+            gl.on("load", () => {
                 state.mapReady = true;
                 if (dom.map) dom.map.inert = false;
                 if (dom.mapPlaceholder) dom.mapPlaceholder.hidden = true;
@@ -111,7 +121,8 @@ export async function initializeVietmap(map, style = "lm", onRouteControlsUpdate
                 }
             });
         });
-    } catch {
+    } catch (err) {
+        console.error("Error initializing Vietmap layer:", err);
         showMapState("Trình duyệt chưa mở được bản đồ VIETMAP. Kiểm tra WebGL và kết nối mạng.");
         return false;
     }
