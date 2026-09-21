@@ -1,69 +1,17 @@
 // ============================================================
-// SIMULATION ENGINE (TICK LOOP, MOVEMENT & COLLECTION)
+// SIMULATION ENGINE (TICK LOOP, LIFECYCLE & CLOCK)
 // ============================================================
 
 import { state, dom } from "../state/store.js";
 import { TRUCK_SPEED_KMH } from "../config/constants.js";
-import RoadRouting from "../road-routing.js";
+import RoadRouting from "./road-routing.js";
 import { updateBinMarker } from "../map/markers.js";
 import { updateTruckMarkerVisual } from "../map/trucks.js";
+import { moveTruck, truckFinished, allTrucksFinished } from "./movement.js";
+import { playCompleteSound } from "../ui/audio.js";
 
-export function markBinCollected(item, truck) {
-    if (!item || item.demoCollected || item.status === "broken") {
-        return;
-    }
-
-    item.demoCollected = true;
-    item.collectedBy = truck.id;
-    truck.collected++;
-
-    updateBinMarker(item);
-}
-
-export function moveTruck(
-    truck,
-    marker,
-    map,
-    meters = (TRUCK_SPEED_KMH / 3.6) * state.speedMultiplier,
-    callbacks = {}
-) {
-    if (!marker || truck.routeStatus !== "ready") return;
-
-    if (truck.dwellRemaining > 0 && meters > 0) {
-        truck.dwellRemaining = Math.max(0, truck.dwellRemaining - 0.1 * state.speedMultiplier);
-        updateTruckMarkerVisual(truck, marker, map);
-        if (state.selectedTruckId === truck.id && callbacks.onTimelineUpdate) {
-            callbacks.onTimelineUpdate();
-        }
-        return;
-    }
-
-    const movement = RoadRouting.advance(truck, meters);
-    if (movement.position) marker.setLatLng(movement.position);
-    updateTruckMarkerVisual(truck, marker, map);
-
-    if (movement.reached && movement.reached.length > 0) {
-        movement.reached.forEach(item => markBinCollected(item, truck));
-        if (meters > 0 && state.speedMultiplier < 10) {
-            truck.dwellRemaining = 1.5;
-        }
-        if (state.selectedTruckId === truck.id) {
-            if (callbacks.onBinVisibilityRefresh) callbacks.onBinVisibilityRefresh();
-            if (callbacks.onTimelineUpdate) callbacks.onTimelineUpdate();
-        }
-    }
-}
-
-export function truckFinished(truck) {
-    return (
-        truck.routeStatus !== "ready" ||
-        (truck.distanceTravelled >= truck.totalDistance && truck.nextStop >= truck.stops.length)
-    );
-}
-
-export function allTrucksFinished() {
-    return state.trucks.every(truck => truckFinished(truck));
-}
+// Re-export movement helpers for convenience and compatibility
+export { markBinCollected, moveTruck, truckFinished, allTrucksFinished } from "./movement.js";
 
 export function updateClock() {
     const totalSeconds = Math.floor(state.simulationSeconds);
@@ -159,6 +107,8 @@ export function finishSimulation(callbacks = {}) {
             ? "⚠️ Đã chạy xong các tuyến khả dụng. Còn tuyến lỗi cần tải lại."
             : "✅ Hoàn thành các tuyến thu gom";
     }
+
+    playCompleteSound();
 
     if (callbacks.onStatsUpdate) callbacks.onStatsUpdate();
     if (callbacks.onTruckListRender) callbacks.onTruckListRender();
