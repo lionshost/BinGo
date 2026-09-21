@@ -74,7 +74,7 @@ function appFixture() {
         fetch: async () => { throw Error('unconfigured fetch'); }
     };
     const context = vm.createContext(sandbox);
-    const source = fs.readFileSync(path.join(__dirname, '../static/app.js'), 'utf8');
+    const source = fs.readFileSync(path.join(__dirname, '../backend-python/static/app.js'), 'utf8');
     vm.runInContext(source.replace(/initialize\(\);\s*$/, ''), context);
     const run = code => vm.runInContext(code, context);
     run(`
