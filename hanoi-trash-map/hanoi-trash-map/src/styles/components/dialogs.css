@@ -1,0 +1,102 @@
+/* ============================================================ */
+/* MODALS, SETUP DIALOG & RESPONSIVENESS                        */
+/* ============================================================ */
+
+dialog#setupDialog {
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    padding: 32px;
+    max-width: 520px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+    background: #fff;
+    color: var(--ink);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0;
+}
+
+dialog#setupDialog::backdrop {
+    background: rgba(15, 23, 42, 0.5);
+    backdrop-filter: blur(4px);
+}
+
+.close-dialog {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+}
+
+#setupDialog h2 {
+    margin: 12px 0 8px;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+.setup-steps {
+    padding-left: 20px;
+    margin: 20px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.setup-steps li strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 2px;
+}
+
+.setup-steps li span {
+    font-size: 12px;
+    color: var(--muted);
+}
+
+.setup-steps code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-family: monospace;
+}
+
+.footnote {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+    margin-top: 16px;
+}
+
+/* RESPONSIVE BREAKPOINTS */
+@media (max-width: 900px) {
+    .command-topbar {
+        padding: 0 12px;
+    }
+    .topbar-stats {
+        display: none;
+    }
+    .sidebar-dock {
+        width: calc(100vw - 32px);
+    }
+    .map-toolbar {
+        top: 10px;
+        right: 10px;
+    }
+    .search-field {
+        width: 150px;
+    }
+    .filter-strip {
+        top: 60px;
+        right: 10px;
+    }
+    .route-focus-bar {
+        min-width: calc(100vw - 32px);
+        bottom: 12px;
+    }
+    .timeline-drawer {
+        width: calc(100vw - 32px);
+        right: 16px;
+        bottom: 74px;
+    }
+}
