@@ -1,361 +1,137 @@
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
     <meta charset="UTF-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
-
-    <title>BinGo thu gom rác thông minh</title>
-
-    <!-- Leaflet -->
-    <link
-        rel="stylesheet"
-        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    >
-
-    <link
-        rel="stylesheet"
-        href="{{ url_for('static', filename='style.css') }}"
-    >
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#166c50">
+    <title>BinGo · Mỗi chuyến xe, thêm một góc xanh</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+    <link rel="stylesheet" href="https://unpkg.com/@vietmap/vietmap-gl-js@6/dist/vietmap-gl.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
-
+<svg class="svg-defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs><symbol id="i-leaf" viewBox="0 0 24 24"><path d="M20 4C9 2 3 7 5 15c7 4 15-1 15-11Z"/><path d="m4 21 11-11"/></symbol><symbol id="i-map" viewBox="0 0 24 24"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3Z"/><path d="M9 3v15M15 6v15"/></symbol><symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 5h11v12H3zM14 9h4l3 4v4h-7"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="18" r="2.5"/></symbol><symbol id="i-pin" viewBox="0 0 24 24"><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z"/><circle cx="12" cy="10" r="2"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L19 6"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-search" viewBox="0 0 24 24"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6"/></symbol><symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 10 6-10 6L2 9Z"/><path d="m2 13 10 6 10-6M2 17l10 6 10-6"/></symbol><symbol id="i-play" viewBox="0 0 24 24"><path d="m8 4 12 8-12 8Z"/></symbol><symbol id="i-pause" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"/></symbol><symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 10a9 9 0 1 1 2 8M3 4v6h6"/></symbol><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol><symbol id="i-bin" viewBox="0 0 24 24"><path d="M3 6h18M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7M14 10v7"/></symbol><symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 1 1 5 2c-2 1-2 2-2 3m0 3v.2"/></symbol><symbol id="i-cross" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol><symbol id="i-focus" viewBox="0 0 24 24"><path d="M3 9V3h6m6 0h6v6m0 6v6h-6m-6 0H3v-6"/><circle cx="12" cy="12" r="3"/></symbol></defs></svg>
 <div class="app">
-
-    <!-- ================= HEADER ================= -->
-
     <header class="topbar">
-
-        <div>
-            <div class="brand">
-                🌿 BinGo
-            </div>
-
-            <div class="subtitle">
-                Thu gom rác thông minh giúp thành phố sạch hơn
-            </div>
-        </div>
-
-        <div class="live-badge">
-            <span class="live-dot"></span>
-            SIMULATION
-        </div>
-
+        <a class="brand" href="/" aria-label="BinGo trang chủ"><span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-leaf"/></svg></span>Bin<span>Go</span><span class="brand-tag">THÀNH PHỐ XANH</span></a>
+        <nav class="main-nav" aria-label="Điều hướng"><button class="nav-link active" id="mapTab"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> Bản đồ</button><button class="nav-link" id="fleetTab"><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg> Đội xe</button></nav>
+        <div class="header-actions"><span class="demo-badge"><i></i> Không gian mô phỏng</span><button class="icon-btn" id="helpBtn" aria-label="Hướng dẫn kết nối Vietmap"><svg class="icon" aria-hidden="true"><use href="#i-help"/></svg></button><span class="avatar" aria-label="BinGo">BG</span></div>
     </header>
-
-
-    <!-- ================= MAIN ================= -->
-
-    <main class="layout">
-
-        <!-- ================= SIDEBAR ================= -->
-
-        <aside class="sidebar">
-
-            <!-- SIMULATION CONTROL -->
-
-            <section class="control-card">
-
-                <h3>
-                    🎮 Điều khiển mô phỏng
-                </h3>
-
-                <div class="button-row">
-
-                    <button
-                        id="startBtn"
-                        class="btn primary"
-                    >
-                        ▶ Bắt đầu
-                    </button>
-
-                    <button
-                        id="pauseBtn"
-                        class="btn"
-                    >
-                        ⏸ Tạm dừng
-                    </button>
-
-                    <button
-                        id="resetBtn"
-                        class="btn"
-                    >
-                        ↻ Reset
-                    </button>
-
-                </div>
-
-
-                <label class="field-label">
-                    Tốc độ mô phỏng
-                </label>
-
-                <div class="speed-row">
-
-                    <button
-                        class="speed-btn active"
-                        data-speed="1"
-                    >
-                        1×
-                    </button>
-
-                    <button
-                        class="speed-btn"
-                        data-speed="2"
-                    >
-                        2×
-                    </button>
-
-                    <button
-                        class="speed-btn"
-                        data-speed="5"
-                    >
-                        5×
-                    </button>
-
-                    <button
-                        class="speed-btn"
-                        data-speed="10"
-                    >
-                        10×
-                    </button>
-
-                </div>
-
-                <div
-                    id="simulationStatus"
-                    class="sim-status"
-                    role="status"
-                    aria-live="polite"
-                >
-                    Sẵn sàng bắt đầu
-                </div>
-
-                <button id="retryRoutesBtn" class="btn" type="button" hidden>
-                    Tải lại tuyến lỗi
-                </button>
-                <p class="subtitle">Tuyến ô tô: OpenStreetMap / OSRM. Điểm thu gom và xe vẫn là mô phỏng.</p>
-
-            </section>
-
-
-            <!-- STATISTICS -->
-
-            <section class="stats-grid">
-
-                <div class="stat-card">
-                    <span>Tổng điểm rác</span>
-                    <strong id="totalCount">0</strong>
-                </div>
-
-                <div class="stat-card">
-                    <span>Đã thu gom</span>
-                    <strong id="collectedCount">0</strong>
-                </div>
-
-                <div class="stat-card">
-                    <span>Chờ thu gom</span>
-                    <strong id="waitingCount">0</strong>
-                </div>
-
-                <div class="stat-card">
-                    <span>Xe hoạt động</span>
-                    <strong id="truckCount">0</strong>
-                </div>
-
-            </section>
-
-
-            <!-- FILTER -->
-
-            <section class="control-card">
-
-                <h3>
-                    🔎 Tìm kiếm điểm rác
-                </h3>
-
-                <input
-                    id="searchInput"
-                    class="input"
-                    type="text"
-                    placeholder="Tên, địa chỉ, quận..."
-                >
-
-                <select
-                    id="districtFilter"
-                    class="input"
-                >
-                    <option value="">
-                        Tất cả quận / huyện
-                    </option>
-                </select>
-
-
-                <select
-                    id="typeFilter"
-                    class="input"
-                >
-                    <option value="">
-                        Tất cả loại thùng
-                    </option>
-                </select>
-
-            </section>
-
-
-            <!-- MAP OPTIONS -->
-
-            <section class="control-card">
-
-                <h3>
-                    🗺️ Hiển thị bản đồ
-                </h3>
-
-                <label class="checkbox-row">
-
-                    <input
-                        id="showRoutes"
-                        type="checkbox"
-                        checked
-                    >
-
-                    Hiển thị tuyến thu gom
-
-                </label>
-
-
-                <label class="checkbox-row">
-
-                    <input
-                        id="showTrucks"
-                        type="checkbox"
-                        checked
-                    >
-
-                    Hiển thị xe thu gom
-
-                </label>
-
-            </section>
-
-
-            <!-- LEGEND -->
-
-            <section class="control-card">
-
-                <h3>
-                    Chú thích
-                </h3>
-
-                <div class="legend">
-
-                    <div>
-                        <span class="legend-bin available">🗑</span>
-                        Còn chỗ
-                    </div>
-
-                    <div>
-                        <span class="legend-bin full">🗑</span>
-                        Đầy
-                    </div>
-
-                    <div>
-                        <span class="legend-bin overloaded">🗑</span>
-                        Quá tải
-                    </div>
-
-                    <div>
-                        <span class="legend-bin broken">!</span>
-                        Hỏng
-                    </div>
-
-                    <div>
-                        <span class="legend-line"></span>
-                        Tuyến xe thu gom
-                    </div>
-
-                </div>
-
-            </section>
-
-
-            <!-- TRUCKS -->
-
-            <section class="control-card">
-
-                <div class="section-title">
-
-                    <h3>
-                        🚛 Xe thu gom
-                    </h3>
-
-                    <div class="section-actions">
-
-                        <span>
-                            DEMO LIVE
-                        </span>
-
-                        <button
-                            id="toggleTruckList"
-                            class="collapse-btn"
-                            type="button"
-                            aria-expanded="true"
-                        >
-                            Thu gọn
-                        </button>
-
-                    </div>
-
-                </div>
-
-                <div id="truckList"></div>
-
-            </section>
-
-        </aside>
-
-
-        <!-- ================= MAP ================= -->
-
-        <section class="map-area">
-
-            <div class="map-overlay">
-
-                <div class="overlay-title">
-                    🚛 Live Collection Simulation
-                </div>
-
-                <div id="mapTime">
-                    00:00
-                </div>
-
-            </div>
-
-            <div id="map"></div>
-
+    <main class="dashboard">
+        <section class="welcome">
+            <div><p class="eyebrow">BINGO / TRUNG TÂM ĐIỀU PHỐI</p><h1>Một hành trình <span>xanh hơn.</span></h1><p class="welcome-copy">Cùng theo dõi từng điểm thu gom, từng chuyến xe trên thành phố.</p></div>
+            <div class="location-tag"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg><div><strong>Hà Nội</strong><small id="providerStatus">VIETMAP · Chờ kết nối</small></div><span class="location-dot"></span></div>
         </section>
-
+        <section class="stats-grid" aria-label="Tổng quan thu gom">
+            <article class="stat-card mint"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-bin"/></svg></span><div><span>Tổng điểm thu gom</span><strong id="totalCount">—</strong><small>Dữ liệu mô phỏng</small></div><span class="stat-decor">01</span></article>
+            <article class="stat-card blue"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-check"/></svg></span><div><span>Đã thu gom</span><strong id="collectedCount">0</strong><small id="completionLabel">Bắt đầu hành trình xanh</small></div><span class="mini-trend">↗</span></article>
+            <article class="stat-card peach"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg></span><div><span>Chờ thu gom</span><strong id="waitingCount">—</strong><small>Không gồm điểm đang hỏng</small></div></article>
+            <article class="stat-card lilac"><span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg></span><div><span>Xe sẵn sàng</span><strong id="truckCount">0</strong><small id="fleetSummary">Đang chuẩn bị đội xe</small></div></article>
+        </section>
+        <div class="workspace">
+            <aside class="sidebar" aria-label="Điều khiển mô phỏng">
+                <section class="control-card mission-card">
+                    <div class="section-title"><span class="eyebrow">CHUYẾN ĐI HÔM NAY</span><span class="small-badge">MÔ PHỎNG</span></div>
+                    <h2>Mỗi điểm sạch,<br>một niềm vui mới.</h2>
+                    <div class="mission-progress"><div class="progress-ring" id="missionRing"><span id="missionPercent">0<small>%</small></span></div><div><strong>Tiến độ thu gom</strong><p id="missionText">Sẵn sàng cho hành trình mới</p></div></div>
+                    <div class="button-row"><button id="startBtn" class="btn primary" disabled><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg> Bắt đầu</button><button id="pauseBtn" class="btn" disabled aria-label="Tạm dừng"><svg class="icon" aria-hidden="true"><use href="#i-pause"/></svg></button><button id="resetBtn" class="btn" disabled aria-label="Đặt lại mô phỏng"><svg class="icon" aria-hidden="true"><use href="#i-reset"/></svg></button></div>
+                    <div class="speed-label"><span>Tốc độ mô phỏng</span><span class="clock-pill"><svg class="icon" aria-hidden="true"><use href="#i-clock"/></svg> <b id="mapTime">00:00</b></span></div>
+                    <div class="speed-row" aria-label="Tốc độ mô phỏng"><button class="speed-btn active" data-speed="1" aria-pressed="true">1×</button><button class="speed-btn " data-speed="2" aria-pressed="false">2×</button><button class="speed-btn " data-speed="5" aria-pressed="false">5×</button><button class="speed-btn " data-speed="10" aria-pressed="false">10×</button></div>
+                    <div id="simulationStatus" class="sim-status" role="status" aria-live="polite">Đang chuẩn bị dữ liệu…</div>
+                    <button id="loadRoutesBtn" class="btn route-load" disabled><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg> Tải tuyến VIETMAP</button>
+                    <button id="retryRoutesBtn" class="btn route-load" hidden>Tải lại tuyến lỗi</button>
+                    <small class="footnote">Xe và điểm thu gom là mô phỏng, không phải GPS trực tiếp.</small>
+                </section>
+                <section class="control-card" id="fleetPanel" tabindex="-1">
+                    <div class="section-title"><h2><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg> Đội xe của bạn</h2><button id="toggleTruckList" class="text-btn" aria-expanded="true">Thu gọn</button></div>
+                    <p class="muted">Chọn một xe để xem vị trí trên bản đồ.</p>
+                    <div id="truckList" class="truck-list"></div>
+                </section>
+            </aside>
+            <section class="map-card" aria-label="Bản đồ điều phối">
+                <div class="map-toolbar">
+                    <div class="search-field"><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg><input id="searchInput" type="search" placeholder="Tìm điểm thu gom, địa chỉ…" aria-label="Tìm điểm thu gom"></div>
+                    <select id="districtFilter" aria-label="Lọc quận huyện"><option value="">Tất cả khu vực</option></select>
+                    <button id="centerMapBtn" class="icon-btn" aria-label="Về trung tâm Hà Nội"><svg class="icon" aria-hidden="true"><use href="#i-focus"/></svg></button>
+                    <button id="layerBtn" class="icon-btn" aria-label="Lớp bản đồ" aria-expanded="false" aria-controls="layerPanel"><svg class="icon" aria-hidden="true"><use href="#i-layers"/></svg></button>
+                </div>
+                <div class="filter-strip" aria-label="Lọc trạng thái">
+                    <button class="filter-chip active" data-filter="all" aria-pressed="true">Tất cả</button>
+                    <button class="filter-chip" data-filter="priority" aria-pressed="false"><i class="dot orange"></i>Cần ưu tiên</button>
+                    <button class="filter-chip" data-filter="collected" aria-pressed="false"><i class="dot blue"></i>Đã thu gom</button>
+                    <button class="filter-chip" data-filter="broken" aria-pressed="false"><i class="dot gray"></i>Cần kiểm tra</button>
+                    <span class="filter-result" aria-live="polite"><span id="visibleCount">0</span> điểm phù hợp</span>
+                </div>
+                <div class="map-stage">
+                    <div id="map"></div>
+                    <div id="mapPlaceholder" class="map-placeholder">
+                        <div class="placeholder-art" aria-hidden="true">
+                            <span class="orbit orbit-one"></span><span class="orbit orbit-two"></span>
+                            <span class="art-tile tile-one"><svg class="icon" aria-hidden="true"><use href="#i-leaf"/></svg></span><span class="art-tile tile-two"><svg class="icon" aria-hidden="true"><use href="#i-pin"/></svg></span>
+                            <span class="art-truck"><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg></span><span class="art-spark">✦</span>
+                        </div>
+                        <span class="small-badge">BẢN ĐỒ VIỆT NAM · VIETMAP</span>
+                        <h2 id="mapStateTitle">Thành phố đã sẵn sàng.<br>Chỉ còn bước kết nối.</h2>
+                        <p id="mapStateText">Kết nối tài khoản VIETMAP để mở bản đồ và tìm tuyến đường cho đội xe của bạn.</p>
+                        <button class="btn primary" id="connectMapBtn">Hướng dẫn kết nối <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+                        <small>Chưa có dữ liệu bản đồ được tải. Không hiển thị nền bản đồ cũ.</small>
+                    </div>
+                    <div id="routeFocusBar" class="route-focus-bar" hidden>
+                        <div class="focus-bar-main">
+                            <span class="focus-badge" id="focusBadge">HN-01</span>
+                            <div class="focus-text">
+                                <strong id="focusTruckTitle">Xe HN-01</strong>
+                                <span id="focusTruckSub">Đang theo dõi lộ trình</span>
+                            </div>
+                        </div>
+                        <div class="focus-actions">
+                            <button id="toggleTimelineBtn" class="btn small" aria-label="Xem lộ trình trạm"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> Lộ trình trạm</button>
+                            <button id="followTruckBtn" class="btn small icon-only" title="Khóa camera theo xe"><svg class="icon" aria-hidden="true"><use href="#i-focus"/></svg></button>
+                            <button id="exitFocusBtn" class="btn small text" title="Hiện tất cả xe"><svg class="icon" aria-hidden="true"><use href="#i-cross"/></svg> Tất cả xe</button>
+                        </div>
+                    </div>
+                    <div id="timelineDrawer" class="timeline-drawer" hidden>
+                        <div class="timeline-drawer-header">
+                            <div>
+                                <div class="timeline-drawer-title"><span id="drawerBadge" class="focus-badge">HN-01</span><strong id="drawerTruckTitle">Xe HN-01</strong></div>
+                                <p id="drawerProgressText">Tiến độ: 0/0 điểm (0%)</p>
+                            </div>
+                            <button id="closeDrawerBtn" class="icon-btn small" aria-label="Đóng bảng lộ trình"><svg class="icon" aria-hidden="true"><use href="#i-cross"/></svg></button>
+                        </div>
+                        <div class="timeline-drawer-bar"><div id="drawerProgressBar" style="width:0%"></div></div>
+                        <div class="timeline-stops-container" id="timelineStopsList"></div>
+                    </div>
+                    <div id="layerPanel" class="layer-panel" hidden>
+                        <h3>Tùy chỉnh bản đồ</h3>
+                        <label for="mapStyle">Giao diện nền</label><select id="mapStyle"><option value="lm">Sáng & dịu mắt</option><option value="tm">Đường phố</option><option value="hm">Vệ tinh & nhãn</option><option value="dm">Ban đêm</option></select>
+                        <label class="checkbox-row"><input id="focusOnlyMode" type="checkbox" checked> Chế độ BusMap (Tập trung 1 tuyến)</label>
+                        <label class="checkbox-row"><input id="showRoutes" type="checkbox" checked> Tuyến thu gom</label>
+                        <label class="checkbox-row"><input id="showTrucks" type="checkbox" checked> Xe thu gom</label>
+                        <label for="typeFilter">Loại điểm thu gom</label><select id="typeFilter"><option value="">Tất cả loại thùng</option></select>
+                    </div>
+                    <div class="map-caption"><span class="live-dot"></span><span id="mapCaption">Chưa kết nối nguồn bản đồ</span><span class="caption-divider"></span><span id="routeUpdated">Chưa tải tuyến</span></div>
+                </div>
+                <footer class="map-footer"><div class="legend"><span><i class="dot green"></i>Còn chỗ</span><span><i class="dot orange"></i>Đầy / quá tải</span><span><i class="dot blue"></i>Đã thu gom</span><span><i class="dot gray"></i>Hỏng</span></div><span class="map-credit"><svg class="icon" aria-hidden="true"><use href="#i-leaf"/></svg> Cùng giữ thành phố xanh</span></footer>
+            </section>
+        </div>
+        <footer class="page-footer"><span>BinGo <b>·</b> Mỗi chuyến xe, thêm một góc xanh.</span><span>Nguồn bản đồ & tuyến đường: VIETMAP</span></footer>
     </main>
-
 </div>
-
-
-<!-- Leaflet -->
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
-
-<!-- Application -->
+<dialog id="setupDialog" aria-labelledby="setupTitle">
+    <button id="closeSetupBtn" class="icon-btn close-dialog" aria-label="Đóng hướng dẫn"><svg class="icon" aria-hidden="true"><use href="#i-cross"/></svg></button>
+    <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg></span><p class="eyebrow">KẾT NỐI MỘT LẦN · KHÁM PHÁ MỖI NGÀY</p>
+    <h2 id="setupTitle">Mở bản đồ VIETMAP của bạn</h2><p>Bản đồ và tuyến đường sẽ được lấy từ dịch vụ VIETMAP khi tài khoản được cấu hình.</p>
+    <ol class="setup-steps"><li><strong>Tạo tài khoản VIETMAP</strong><span>Nhận Tilemap key và Services key từ tài khoản của bạn.</span></li><li><strong>Thêm hai khóa vào máy chủ</strong><span>Sao chép <code>config.example.json</code> thành <code>config.local.json</code> và điền hai khóa. Services key không xuất hiện trên trình duyệt.</span></li><li><strong>Tải lại trang và chọn “Tải tuyến”</strong><span>Mỗi lần tải tuyến có thể sử dụng hạn mức dịch vụ. Reset mô phỏng dùng lại tuyến hiện tại.</span></li></ol>
+    <a class="btn primary" href="https://maps.vietmap.vn/console-v2/register" target="_blank" rel="noopener noreferrer">Đến VIETMAP <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    <p class="footnote">Tilemap key cần được giới hạn theo tên miền. Dữ liệu mới nhất khả dụng phụ thuộc VIETMAP; các vị trí thùng rác mẫu chưa được xác minh.</p>
+</dialog>
+<script id="mapConfig" type="application/json">{{ map_config|tojson }}</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+{% if map_config.tilemapKey %}
+<script src="https://unpkg.com/@vietmap/vietmap-gl-js@6/dist/vietmap-gl.js"></script>
+<script src="https://unpkg.com/@vietmap/vietmap-gl-leaflet/leaflet-vietmap-gl.js"></script>
+{% endif %}
 <script src="{{ url_for('static', filename='road-routing.js') }}"></script>
-<script
-    src="{{ url_for('static', filename='app.js') }}">
-</script>
-
+<script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
-
 </html>
