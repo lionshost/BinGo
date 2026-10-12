@@ -77,6 +77,7 @@
     <main class="command-center-workspace">
         <!-- COLLAPSIBLE SIDEBAR DOCK (320px) -->
         <aside class="sidebar-dock" id="sidebarDock" aria-label="Bảng điều khiển và danh sách đội xe">
+            <button class="sheet-handle" id="sheetHandle" aria-label="Đóng bảng điều khiển" title="Đóng bảng điều khiển"></button>
             <div class="sidebar-dock-inner">
                 <!-- MISSION CARD -->
                 <section class="control-card mission-card">
@@ -239,7 +240,10 @@
                 <span id="routeUpdated">Chưa tải tuyến</span>
             </div>
 
-            <div class="floating-legend">
+            <button class="icon-btn legend-toggle" id="legendToggle" aria-label="Chú thích bản đồ" aria-expanded="false" aria-controls="mapLegend" title="Chú thích">
+                <svg class="icon" aria-hidden="true"><use href="#i-help"/></svg>
+            </button>
+            <div class="floating-legend" id="mapLegend">
                 <span><i class="dot green"></i>Còn chỗ</span>
                 <span><i class="dot orange"></i>Đầy / quá tải</span>
                 <span><i class="dot blue"></i>Đã thu gom</span>

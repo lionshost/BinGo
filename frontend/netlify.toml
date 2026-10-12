@@ -1,0 +1,13 @@
+# Netlify: Base directory = frontend
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Cho phép mở /map (không có .html)
+[[redirects]]
+  from = "/map"
+  to = "/map.html"
+  status = 200

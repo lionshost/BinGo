@@ -2344,23 +2344,297 @@ html, body.map-centric-body {
     }
 }
 
+/* Mobile-only controls; hidden on desktop */
+.sheet-handle,
+.legend-toggle {
+    display: none;
+}
+
+/* ============================================================ */
+/* MOBILE MAP LAYOUT (≤768px)                                    */
+/* App-style map: search + chips on top, control panel as a     */
+/* bottom sheet, legend behind a toggle. Selectors are prefixed  */
+/* to win over legacy 500px/800px rules earlier in this file.    */
+/* ============================================================ */
 @media (max-width: 768px) {
+    /* Topbar */
+    .command-topbar .btn-inspect-topbar {
+        white-space: nowrap;
+        height: 34px;
+        padding: 0 12px;
+        font-size: 12px;
+    }
+    .command-topbar .compact-loc {
+        display: none; /* city label is redundant on a phone; frees room for the topbar actions */
+    }
+
+    /* Search bar */
+    .map-viewport .floating-map-tools {
+        top: 10px;
+        left: 12px;
+        right: 12px;
+        gap: 6px;
+        padding: 4px 4px 4px 6px;
+        background: #ffffff;
+        border-radius: 14px;
+        box-shadow: 0 4px 18px rgba(25, 61, 52, 0.16);
+    }
+    .map-viewport .compact-search {
+        flex: 1;
+        width: auto;
+        min-width: 0;
+        height: 38px;
+    }
+    .map-viewport .compact-search input {
+        height: 36px;
+        font-size: 16px; /* 16px stops iOS from zooming the page on focus */
+    }
+    .map-viewport .floating-map-tools .icon-btn {
+        width: 38px;
+        height: 38px;
+        border: none;
+        background: #f1f6f2;
+    }
+
+    /* Filter chips: a borderless, horizontally scrolling row */
+    .map-viewport .floating-filter-strip {
+        top: 64px;
+        left: 0;
+        right: 0;
+        transform: none;
+        max-width: none;
+        gap: 8px;
+        padding: 2px 12px 8px;
+        background: transparent;
+        border: none;
+        border-radius: 0;
+        box-shadow: none;
+        backdrop-filter: none;
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+    .map-viewport .floating-filter-strip::-webkit-scrollbar {
+        display: none;
+    }
+    .map-viewport .floating-filter-strip .filter-chip {
+        flex-shrink: 0;
+        height: 32px;
+        padding: 0 13px;
+        font-size: 12px;
+        border-radius: 999px;
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(25, 61, 52, 0.14);
+    }
+    .map-viewport .floating-filter-strip .filter-chip.active {
+        background: var(--deep);
+        border-color: var(--deep);
+        color: #ffffff;
+    }
+    .map-viewport .floating-filter-strip .filter-result {
+        display: none;
+    }
+
+    /* Layer panel (the district filter is moved in here by dialogs.js) */
+    .map-viewport .layer-panel {
+        top: 62px;
+        right: 12px;
+        width: min(300px, calc(100% - 24px));
+        max-height: calc(100% - 140px);
+        overflow-y: auto;
+        border-radius: 16px;
+    }
+    .map-viewport .layer-panel h3 {
+        font-size: 14px;
+    }
+    .map-viewport .layer-panel label {
+        font-size: 12px;
+    }
+    .map-viewport .layer-panel .checkbox-row {
+        font-size: 13px;
+        color: var(--ink);
+    }
+    .map-viewport .layer-panel select {
+        width: 100%;
+        max-width: none;
+        height: 38px;
+        font-size: 14px;
+    }
+
+    /* Leaflet zoom buttons sit under the search bar; phones pinch-zoom */
+    .map-viewport .leaflet-control-zoom {
+        display: none;
+    }
+
+    /* Route focus bar (when following a truck) */
+    .map-viewport .route-focus-bar {
+        top: 108px;
+        left: 12px;
+        right: 12px;
+        transform: none;
+        max-width: none;
+        flex-wrap: wrap;
+        gap: 8px;
+        border-radius: 16px;
+        padding: 8px 12px;
+        animation: none;
+    }
+    .map-viewport .focus-actions {
+        margin-left: auto;
+    }
+    .map-viewport .focus-badge {
+        font-size: 11px;
+    }
+    .map-viewport .focus-text strong {
+        font-size: 13px;
+    }
+    .map-viewport .focus-text span {
+        font-size: 11px;
+    }
+    .map-viewport .btn.small {
+        font-size: 12px;
+    }
+
+    /* Control panel → bottom sheet */
     .sidebar-dock {
         position: absolute;
-        top: 0;
-        bottom: 0;
+        top: auto;
         left: 0;
-        box-shadow: 8px 0 30px rgba(0,0,0,0.15);
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        height: auto;
+        max-height: 72%;
+        border-right: none;
+        border-radius: 20px 20px 0 0;
+        box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.18);
+        z-index: 700;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s;
     }
-    .floating-filter-strip {
-        left: 14px;
-        transform: none;
-        max-width: calc(100% - 28px);
-        overflow-x: auto;
+    .sidebar-dock.collapsed {
+        margin-left: 0;
+        transform: translateY(100%);
+        visibility: hidden;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), visibility 0s 0.3s;
     }
-    .floating-map-tools {
-        top: 60px;
-        right: 14px;
+    .sidebar-dock-inner {
+        padding-top: 0;
+    }
+    .sheet-handle {
+        display: block;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        width: 100%;
+        height: 26px;
+        border: 0;
+        background: #ffffff;
+        cursor: pointer;
+    }
+    .sheet-handle::before {
+        content: "";
+        display: block;
+        width: 40px;
+        height: 4px;
+        margin: 11px auto;
+        border-radius: 2px;
+        background: #cfd9d3;
+    }
+
+    /* Pill that opens the sheet */
+    .command-center-workspace .floating-sidebar-trigger {
+        top: auto;
+        bottom: 18px;
+        left: 50%;
+        transform: translateX(-50%);
+        padding: 11px 20px;
+        font-size: 13px;
+        border-radius: 999px;
+        box-shadow: 0 6px 20px rgba(25, 61, 52, 0.22);
+    }
+    .command-center-workspace .floating-sidebar-trigger:hover {
+        transform: translateX(-50%);
+    }
+
+    /* Legend behind a toggle; route caption is shown in the sheet instead */
+    .map-viewport .legend-toggle {
+        display: inline-flex;
+        position: absolute;
+        right: 12px;
+        bottom: 20px;
+        z-index: 450;
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        box-shadow: 0 4px 14px rgba(25, 61, 52, 0.16);
+    }
+    .map-viewport .legend-toggle[aria-expanded="true"] {
+        color: var(--green);
+        border-color: var(--green);
+    }
+    .map-viewport .floating-legend {
+        display: none;
+        left: auto;
+        right: 12px;
+        bottom: 68px;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 9px;
+        padding: 12px 14px;
+        font-size: 12px;
+        color: var(--ink);
+        border-radius: 12px;
+    }
+    .map-viewport .floating-legend.open {
+        display: flex;
+    }
+    .map-viewport .floating-caption {
+        display: none;
+    }
+
+    /* Route timeline → bottom sheet */
+    .map-viewport .timeline-drawer {
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-height: 60%;
+        border-radius: 20px 20px 0 0;
+    }
+    .map-viewport .timeline-stops-container {
+        flex: 1;
+        min-height: 0;
+        max-height: none;
+    }
+    .map-viewport .timeline-drawer-title strong {
+        font-size: 14px;
+    }
+    .map-viewport .timeline-drawer-header p {
+        font-size: 11px;
+    }
+    .map-viewport .stop-num {
+        width: 22px;
+        height: 22px;
+        font-size: 11px;
+    }
+    .map-viewport .stop-name {
+        font-size: 13px;
+    }
+    .map-viewport .stop-sub {
+        font-size: 11px;
+    }
+    .map-viewport .stop-status-pill {
+        font-size: 10px;
+    }
+
+    /* Markers */
+    .map-viewport .truck-tag {
+        font-size: 10px;
+    }
+    .map-viewport .bin-stop-marker {
+        font-size: 12px;
     }
 }
 
