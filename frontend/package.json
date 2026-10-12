@@ -1,0 +1,20 @@
+{
+  "name": "bingo-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BinGo · Landing page + bản đồ điều phối thu gom rác (Vite)",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node --test \"tests/**/*.test.js\""
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.0.9",
+    "tailwindcss": "^4.0.9",
+    "vite": "^6.2.0"
+  },
+  "author": "BinGo Team",
+  "license": "MIT"
+}

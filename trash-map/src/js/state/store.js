@@ -26,7 +26,9 @@ export const state = {
     selectedTruckId: null,
     followSelectedTruck: false,
     focusOnlyMode: true,
-    statusFilter: "all"
+    statusFilter: "all",
+    pendingReviews: [],
+    activeInspectBinId: null
 };
 
 // Cached DOM element accessors
@@ -80,5 +82,19 @@ export const dom = {
     get missionText() { return document.getElementById("missionText"); },
     get completionLabel() { return document.getElementById("completionLabel"); },
     get fleetSummary() { return document.getElementById("fleetSummary"); },
-    get routeUpdated() { return document.getElementById("routeUpdated"); }
+    get routeUpdated() { return document.getElementById("routeUpdated"); },
+    get inspectDialog() { return document.getElementById("inspectDialog"); },
+    get openInspectBtn() { return document.getElementById("openInspectBtn"); },
+    get closeInspectBtn() { return document.getElementById("closeInspectBtn"); },
+    get inspectBinSelect() { return document.getElementById("inspectBinSelect"); },
+    get imageFileInput() { return document.getElementById("imageFileInput"); },
+    get imageDropzone() { return document.getElementById("imageDropzone"); },
+    get imagePreview() { return document.getElementById("imagePreview"); },
+    get analyzeImageBtn() { return document.getElementById("analyzeImageBtn"); },
+    get inspectionResultCard() { return document.getElementById("inspectionResultCard"); },
+    get applyAnalysisBtn() { return document.getElementById("applyAnalysisBtn"); },
+    get sendToReviewBtn() { return document.getElementById("sendToReviewBtn"); },
+    get pendingReviewsCard() { return document.getElementById("pendingReviewsCard"); },
+    get manualReviewList() { return document.getElementById("manualReviewList"); },
+    get manualReviewCount() { return document.getElementById("manualReviewCount"); }
 };

@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { roadRoute, RoutingError, MAX_STOPS } from './services/routing.js';
+import { analyzeWasteImage, parseImageDataUrl, VisionError, DEFAULT_MODEL } from './services/waste-vision.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,7 +12,7 @@ const rootDir = path.resolve(__dirname, '..');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.json({ limit: '32kb' }));
+app.use(express.json({ limit: '10mb' }));
 
 function getSettings() {
   const localConfigPath = path.join(rootDir, 'config.local.json');
@@ -35,8 +36,10 @@ function getSettings() {
   const servicesKey = (process.env.VIETMAP_SERVICES_KEY || fileConfig.VIETMAP_SERVICES_KEY || '').trim();
   const vehicle = (process.env.VIETMAP_VEHICLE || fileConfig.VIETMAP_VEHICLE || 'car').trim();
   const capacity = (process.env.VIETMAP_TRUCK_WEIGHT_KG || fileConfig.VIETMAP_TRUCK_WEIGHT_KG || '').toString().trim();
+  const geminiKey = (process.env.GEMINI_API_KEY || fileConfig.GEMINI_API_KEY || '').trim();
+  const geminiModel = (process.env.GEMINI_MODEL || fileConfig.GEMINI_MODEL || DEFAULT_MODEL).trim();
 
-  return { tilemapKey, servicesKey, vehicle, capacity };
+  return { tilemapKey, servicesKey, vehicle, capacity, geminiKey, geminiModel };
 }
 
 function publicConfig() {
@@ -47,6 +50,8 @@ function publicConfig() {
     tilemapKey: settings.tilemapKey,
     routingConfigured: Boolean(settings.servicesKey) && weightOk && ['car', 'truck'].includes(settings.vehicle),
     vehicle: settings.vehicle,
+    geminiConfigured: Boolean(settings.geminiKey),
+    geminiModel: settings.geminiModel,
   };
 }
 
@@ -129,6 +134,19 @@ app.post('/api/road-route', async (req, res) => {
       error: 'Chưa cấu hình VIETMAP Services key trên máy chủ và Flask server chưa khởi động.',
       detail: err.message,
     });
+  }
+});
+
+app.post('/api/analyze-waste-image', async (req, res) => {
+  try {
+    const { image, bin_id } = req.body || {};
+    const parsedImage = parseImageDataUrl(image);
+    const settings = getSettings();
+    const result = await analyzeWasteImage(parsedImage, settings);
+    return res.json({ ...result, bin_id: bin_id || null });
+  } catch (err) {
+    const status = err instanceof VisionError ? err.status : 500;
+    return res.status(status).json({ error: err.message || 'Lỗi phân tích ảnh.' });
   }
 });
 

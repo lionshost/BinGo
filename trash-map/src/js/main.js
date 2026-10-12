@@ -25,6 +25,7 @@ import { initializeFilters, setupFilterEvents, setupSpeedButtons } from "./ui/fi
 import { renderTruckList } from "./ui/fleet-list.js";
 import { selectTruck, updateTimelineUI, setupFocusPanelEvents } from "./ui/focus-panel.js";
 import { setupDialogsAndNavigation } from "./ui/dialogs.js";
+import { setupInspectionUI } from "./ui/inspection.js";
 
 // Initialize Map Instance
 const map = getMapInstance();
@@ -83,6 +84,7 @@ setupFilterEvents(() => callbacks.onBinVisibilityRefresh());
 setupSpeedButtons();
 setupFocusPanelEvents(map, callbacks);
 setupDialogsAndNavigation(map, callbacks);
+setupInspectionUI(map, callbacks);
 
 // Main bootstrap
 async function initialize() {

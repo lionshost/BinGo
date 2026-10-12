@@ -1,0 +1,118 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Be Vietnam Pro', Arial, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Brand Palette */
+  --color-ink: #193d34;
+  --color-muted: #70877e;
+  --color-green: #178760;
+  --color-deep: #116347;
+  --color-line: #e4ece6;
+  --color-surface: #ffffff;
+  --color-canvas: #f6f8f4;
+
+  /* Stat cards */
+  --color-card-mint: #eaf6f0;
+  --color-card-blue: #eaf1fb;
+  --color-card-peach: #fdf1eb;
+  --color-card-lilac: #f3eefb;
+}
+
+:root {
+    --ink: #193d34;
+    --muted: #70877e;
+    --green: #178760;
+    --deep: #116347;
+    --line: #e4ece6;
+    --surface: #fff;
+    --canvas: #f6f8f4;
+    --shadow: 0 8px 30px #294b3410;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    margin: 0;
+    min-height: 100%;
+    font-family: 'Be Vietnam Pro', Arial, sans-serif;
+    color: var(--ink);
+    background: var(--canvas);
+}
+
+body.map-centric-body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden !important;
+    background: var(--canvas);
+}
+
+.map-centric-app {
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+button, input, select {
+    font: inherit;
+}
+
+button, a, input, select {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: .45;
+}
+
+button:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+button, a {
+    touch-action: manipulation;
+}
+
+a {
+    color: inherit;
+}
+
+button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible {
+    outline: 3px solid #4ea9f6;
+    outline-offset: 3px;
+}
+
+[hidden] {
+    display: none !important;
+}
+
+.svg-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.icon {
+    width: 20px;
+    height: 20px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    flex-shrink: 0;
+}

@@ -60,6 +60,9 @@
         </div>
 
         <div class="header-actions">
+            <button class="btn primary btn-inspect-topbar" id="openInspectBtn" title="Chụp ảnh / Giám định rác AI">
+                📸 <span>Báo cáo ảnh AI</span>
+            </button>
             <nav class="main-nav" aria-label="Điều hướng" style="display:none;">
                 <button class="nav-link active" id="mapTab"><svg class="icon" aria-hidden="true"><use href="#i-map"/></svg> Bản đồ</button>
                 <button class="nav-link" id="fleetTab"><svg class="icon" aria-hidden="true"><use href="#i-truck"/></svg> Đội xe</button>
@@ -105,6 +108,16 @@
                     <button id="loadRoutesBtn" class="btn route-load" disabled><svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg> Tải tuyến VIETMAP</button>
                     <button id="retryRoutesBtn" class="btn route-load" hidden>Tải lại tuyến lỗi</button>
                     <small class="footnote">Xe và điểm thu gom là mô phỏng, không phải GPS trực tiếp.</small>
+                </section>
+
+                <!-- PENDING MANUAL REVIEWS CARD -->
+                <section class="control-card review-card" id="pendingReviewsCard">
+                    <div class="section-title">
+                        <h2><svg class="icon" aria-hidden="true"><use href="#i-search"/></svg> Chờ kiểm tra thủ công</h2>
+                        <span class="count-badge" id="manualReviewCount">0</span>
+                    </div>
+                    <p class="muted">Các ảnh mờ, thiếu sáng hoặc chưa rõ hiện trạng cần người vận hành xác nhận.</p>
+                    <div id="manualReviewList" class="manual-review-list"></div>
                 </section>
 
                 <!-- FLEET PANEL -->
@@ -236,6 +249,41 @@
     </main>
 </div>
 
+<!-- INSPECT & AI WASTE VISION MODAL -->
+<dialog id="inspectDialog" class="inspect-dialog" aria-labelledby="inspectTitle">
+    <button id="closeInspectBtn" class="icon-btn close-dialog" aria-label="Đóng"><svg class="icon" aria-hidden="true"><use href="#i-cross"/></svg></button>
+    <span class="brand-mark"><svg class="icon" aria-hidden="true"><use href="#i-bin"/></svg></span>
+    <p class="eyebrow">AI VISION · NHẬN DIỆN & PHÂN LOẠI CHẤT THẢI</p>
+    <h2 id="inspectTitle">Giám định điểm chứa rác thông minh</h2>
+    <p class="muted">Nhận diện mức đầy, cảnh báo rác tràn và hướng dẫn phân loại 4 nhóm chất thải qua ảnh chụp (Gemini Vision).</p>
+
+    <div class="inspect-form">
+        <label for="inspectBinSelect"><strong>1. Điểm thu gom mục tiêu:</strong></label>
+        <select id="inspectBinSelect" class="compact-select inspect-select">
+            <option value="">-- Chọn điểm thu gom --</option>
+        </select>
+
+        <label style="margin-top:14px;display:block;"><strong>2. Hình ảnh hiện trường:</strong></label>
+        <input type="file" id="imageFileInput" accept="image/jpeg,image/png,image/webp" capture="environment" hidden>
+        
+        <div id="imageDropzone" class="image-dropzone" tabindex="0" role="button" aria-label="Khu vực tải hoặc chụp ảnh">
+            <div class="dropzone-placeholder">
+                <span class="dropzone-icon">📷</span>
+                <strong>Chạm để chụp ảnh hoặc tải ảnh lên</strong>
+                <p>Hỗ trợ kéo thả file hoặc dán trực tiếp từ clipboard (Ctrl + V). Tối đa 8 MB (JPEG, PNG, WebP).</p>
+            </div>
+            <img id="imagePreview" alt="Xem trước ảnh rác" hidden>
+        </div>
+
+        <button id="analyzeImageBtn" class="btn primary btn-full-width" disabled style="margin-top:14px;">
+            <span>✨ Bắt đầu nhận diện AI</span>
+        </button>
+
+        <!-- RESULT CARD -->
+        <div id="inspectionResultCard" class="inspection-result-card" hidden></div>
+    </div>
+</dialog>
+
 <!-- SETUP DIALOG MODAL -->
 <dialog id="setupDialog" aria-labelledby="setupTitle">
     <button id="closeSetupBtn" class="icon-btn close-dialog" aria-label="Đóng hướng dẫn"><svg class="icon" aria-hidden="true"><use href="#i-cross"/></svg></button>
@@ -245,7 +293,7 @@
     <p>Bản đồ và tuyến đường sẽ được lấy từ dịch vụ VIETMAP khi tài khoản được cấu hình.</p>
     <ol class="setup-steps">
         <li><strong>Tạo tài khoản VIETMAP</strong><span>Nhận Tilemap key và Services key từ tài khoản của bạn.</span></li>
-        <li><strong>Thêm hai khóa vào máy chủ</strong><span>Sao chép <code>config.example.json</code> thành <code>config.local.json</code> và điền hai khóa. Services key không xuất hiện trên trình duyệt.</span></li>
+        <li><strong>Thêm hai khóa vào máy chủ</strong><span>Đặt <code>VIETMAP_TILEMAP_KEY</code> và <code>VIETMAP_SERVICES_KEY</code> trong <code>backend/.env</code> (hoặc biến môi trường trên Render), rồi khởi động lại backend. Services key không xuất hiện trên trình duyệt.</span></li>
         <li><strong>Tải lại trang và chọn “Tải tuyến”</strong><span>Mỗi lần tải tuyến có thể sử dụng hạn mức dịch vụ. Reset mô phỏng dùng lại tuyến hiện tại.</span></li>
     </ol>
     <a class="btn primary" href="https://maps.vietmap.vn/console-v2/register" target="_blank" rel="noopener noreferrer">Đến VIETMAP <svg class="icon" aria-hidden="true"><use href="#i-arrow"/></svg></a>

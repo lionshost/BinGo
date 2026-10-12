@@ -1,0 +1,33 @@
+# Render Blueprint cho backend BinGo (New → Blueprint → chọn repo).
+# Các biến sync:false sẽ được Render hỏi khi tạo service; không ghi khóa thật vào file này.
+services:
+  - type: web
+    name: bingo-api
+    runtime: node
+    rootDir: backend
+    plan: free
+    region: singapore
+    buildCommand: npm ci
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL
+        value: "true"
+      - key: CORS_ORIGINS
+        sync: false
+      - key: VIETMAP_TILEMAP_KEY
+        sync: false
+      - key: VIETMAP_SERVICES_KEY
+        sync: false
+      - key: VIETMAP_VEHICLE
+        value: car
+      - key: VIETMAP_TRUCK_WEIGHT_KG
+        value: ""
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash

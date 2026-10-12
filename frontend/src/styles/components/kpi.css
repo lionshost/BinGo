@@ -1,0 +1,127 @@
+/* ============================================================ */
+/* KPI CARDS & PROGRESS RING                                     */
+/* ============================================================ */
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.stat-card.mint { background: var(--color-card-mint, #eaf6f0); border-color: #c4e5d3; }
+.stat-card.blue { background: var(--color-card-blue, #eaf1fb); border-color: #bfdbfe; }
+.stat-card.peach { background: var(--color-card-peach, #fdf1eb); border-color: #fed7aa; }
+.stat-card.lilac { background: var(--color-card-lilac, #f3eefb); border-color: #e9d5ff; }
+
+.stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.85);
+    flex-shrink: 0;
+}
+
+.stat-icon .icon {
+    width: 24px;
+    height: 24px;
+}
+
+.stat-card.mint .stat-icon { color: #116347; }
+.stat-card.blue .stat-icon { color: #1d4ed8; }
+.stat-card.peach .stat-icon { color: #c2410c; }
+.stat-card.lilac .stat-icon { color: #7e22ce; }
+
+.stat-card strong {
+    display: block;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.1;
+    margin: 4px 0 2px;
+}
+
+.stat-card span {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+}
+
+.stat-card small {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.stat-decor {
+    position: absolute;
+    right: 18px;
+    top: 14px;
+    font-size: 22px;
+    font-weight: 900;
+    opacity: 0.12;
+}
+
+.mini-trend {
+    position: absolute;
+    right: 18px;
+    top: 18px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #2563eb;
+}
+
+/* MISSION PROGRESS RING */
+.mission-progress {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0;
+}
+
+.progress-ring {
+    --progress: 0%;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: conic-gradient(var(--green) var(--progress), #e2ebe6 var(--progress));
+    display: grid;
+    place-items: center;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.progress-ring::before {
+    content: '';
+    position: absolute;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: #fff;
+}
+
+.progress-ring span {
+    position: relative;
+    z-index: 1;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.progress-ring small {
+    font-size: 10px;
+    font-weight: 700;
+}

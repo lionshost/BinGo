@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { decodePolyline, distance, convert, MAX_STOPS } from '../server/services/routing.js';
+import { decodePolyline, distance, convert, MAX_STOPS } from '../src/services/routing.js';
 
 // Polyline encoding helper for tests
 function encode(points) {

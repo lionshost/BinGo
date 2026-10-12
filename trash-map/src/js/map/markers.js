@@ -68,9 +68,14 @@ export function popupContent(item) {
             <div style="margin-top:7px;font-weight:700;">
                 ${status.icon} Hiện trạng: ${escapeHtml(status.label)}
             </div>
+            <button class="popup-inspect-btn" data-bin-id="${escapeHtml(item.id)}" style="margin-top:9px;width:100%;padding:6px 10px;background:#178760;color:#fff;border:none;border-radius:7px;cursor:pointer;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:5px;">
+                📸 Báo cáo ảnh / AI Giám định
+            </button>
         </div>
     `;
 }
+
+let mapInspectDelegated = false;
 
 export function createBinMarkers(map) {
     state.bins.forEach(item => {
@@ -87,6 +92,18 @@ export function createBinMarkers(map) {
         marker.addTo(map);
         state.binMarkers.set(item.id, marker);
     });
+
+    if (map && map.getContainer && !mapInspectDelegated) {
+        mapInspectDelegated = true;
+        map.getContainer().addEventListener("click", event => {
+            const btn = event.target.closest(".popup-inspect-btn");
+            if (btn && btn.dataset.binId) {
+                if (typeof window.bingoOpenInspection === "function") {
+                    window.bingoOpenInspection(btn.dataset.binId);
+                }
+            }
+        });
+    }
 }
 
 export function updateBinMarker(item) {

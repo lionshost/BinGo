@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import * as road from '../src/js/road-routing.js';
+import * as road from '../src/js/simulation/road-routing.js';
 
 function fixture() {
     const truck = {orderedBins: [{id: 'a'}, {id: 'b'}, {id: 'c'}]};

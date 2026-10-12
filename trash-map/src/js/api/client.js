@@ -42,3 +42,18 @@ export async function requestRoadRoute(binIds, signal) {
     }
     return data;
 }
+
+export async function analyzeWasteImageApi(dataUrl, binId, signal) {
+    const res = await fetch("/api/analyze-waste-image", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataUrl, bin_id: binId || null }),
+        signal
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        throw new Error(data.error || "Lỗi khi phân tích ảnh.");
+    }
+    return data;
+}
+
