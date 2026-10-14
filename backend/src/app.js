@@ -7,7 +7,7 @@ import cors from 'cors';
 import { env, publicConfig } from './config/env.js';
 import { getPool } from './db/pool.js';
 import { listBins, findBinsByIds } from './repositories/bins.js';
-import { roadRoute, RoutingError, MAX_STOPS } from './services/routing.js';
+import { directions, roadRoute, RoutingError, MAX_STOPS } from './services/routing.js';
 import { analyzeWasteImage, parseImageDataUrl, VisionError } from './services/waste-vision.js';
 
 const asyncRoute = handler => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
@@ -68,6 +68,33 @@ export function createApp() {
 
         try {
             return res.json(await roadRoute(selected, env));
+        } catch (err) {
+            if (err instanceof RoutingError) return res.status(503).json({ error: err.message });
+            throw err;
+        }
+    }));
+
+    // Chỉ đường từ vị trí hiện tại tới một điểm thu gom (app mobile).
+    app.post('/api/directions', asyncRoute(async (req, res) => {
+        const from = req.body?.from;
+        const binId = req.body?.to_bin_id;
+        const lat = Number(from?.lat);
+        const lon = Number(from?.lon);
+        if (!Number.isFinite(lat) || !Number.isFinite(lon) || lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+            return res.status(400).json({ error: 'Vị trí xuất phát không hợp lệ.' });
+        }
+        if (typeof binId !== 'string' || !binId) {
+            return res.status(400).json({ error: 'Thiếu mã điểm thu gom.' });
+        }
+        const [item] = await findBinsByIds([binId]);
+        const toLat = Number(item?.latitude);
+        const toLon = Number(item?.longitude);
+        if (!item || !Number.isFinite(toLat) || !Number.isFinite(toLon)) {
+            return res.status(400).json({ error: 'Điểm thu gom không tồn tại.' });
+        }
+
+        try {
+            return res.json(await directions({ latitude: lat, longitude: lon }, { latitude: toLat, longitude: toLon }, env));
         } catch (err) {
             if (err instanceof RoutingError) return res.status(503).json({ error: err.message });
             throw err;

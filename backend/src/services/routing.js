@@ -206,7 +206,7 @@ async function fetchWithThrottle(url, timeoutMs = 15000) {
     }
 }
 
-export async function roadRoute(bins, settings) {
+function routeParams(settings) {
     if (!settings?.servicesKey) {
         throw new RoutingError("Chưa cấu hình VIETMAP Services key trên máy chủ.");
     }
@@ -228,6 +228,49 @@ export async function roadRoute(bins, settings) {
         }
         params.set("capacity", settings.capacity);
     }
+    return { params, vehicle };
+}
+
+/** Chuyển kết quả Route v4 (2 điểm) thành đường đi + hướng dẫn từng bước. */
+export function convertDirections(payload) {
+    const path = Array.isArray(payload?.paths) ? payload.paths[0] : null;
+    if (!path || typeof path !== "object") {
+        throw new RoutingError("VIETMAP không tìm được đường tới điểm này.");
+    }
+    const geometry = decodePolyline(path.points);
+    const steps = (Array.isArray(path.instructions) ? path.instructions : [])
+        .filter(item => item && typeof item.text === "string")
+        .map(item => ({
+            text: item.text,
+            distance: Math.round(Number(item.distance) || 0),
+            time: Math.round((Number(item.time) || 0) / 1000),
+            sign: Number.isInteger(item.sign) ? item.sign : 0,
+            // Vị trí điểm rẽ trong geometry — app dùng để dẫn đường theo GPS.
+            index: Array.isArray(item.interval) && Number.isInteger(item.interval[0])
+                ? Math.min(Math.max(item.interval[0], 0), geometry.length - 1)
+                : 0
+        }));
+    return {
+        geometry,
+        distance: Math.round(Number(path.distance) || 0),
+        time: Math.round((Number(path.time) || 0) / 1000),
+        steps,
+        source: "VIETMAP Route v4"
+    };
+}
+
+/** Đường bộ từ vị trí người dùng tới một điểm thu gom. from/to: { latitude, longitude }. */
+export async function directions(from, to, settings) {
+    const { params, vehicle } = routeParams(settings);
+    for (const item of [from, to]) {
+        params.append("point", `${item.latitude.toFixed(6)},${item.longitude.toFixed(6)}`);
+    }
+    const payload = await fetchWithThrottle(`https://maps.vietmap.vn/api/route/v4?${params.toString()}`);
+    return { ...convertDirections(payload), profile: vehicle };
+}
+
+export async function roadRoute(bins, settings) {
+    const { params, vehicle } = routeParams(settings);
 
     const requested = bins.length > 1 ? bins : [bins[0], bins[0]];
     for (const item of requested) {

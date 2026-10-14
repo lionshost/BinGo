@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { decodePolyline, distance, convert, MAX_STOPS } from '../src/services/routing.js';
+import { decodePolyline, distance, convert, convertDirections, MAX_STOPS } from '../src/services/routing.js';
 
 // Polyline encoding helper for tests
 function encode(points) {
@@ -78,4 +78,29 @@ test('convert matches snapped waypoints to geometry indices', () => {
     assert.equal(res.stops[1].route_index, 2);
     assert.equal(res.stops[2].bin_id, 'bin-3');
     assert.equal(res.stops[2].route_index, 4);
+});
+
+test('convertDirections returns geometry, totals and turn-by-turn steps', () => {
+    const geometry = [[21.0, 105.8], [21.001, 105.801], [21.002, 105.802]];
+    const res = convertDirections({
+        code: 'OK',
+        paths: [{
+            points: encode(geometry),
+            distance: 312.4,
+            time: 61500,
+            instructions: [
+                { sign: 0, text: 'Đi thẳng', distance: 200.2, time: 40000, interval: [0, 1] },
+                { sign: 2, text: 'Rẽ phải', distance: 112.2, time: 21500, interval: [1, 2] },
+                { sign: 4, text: 'Đến nơi', distance: 0, time: 0 },
+                null
+            ]
+        }]
+    });
+    assert.equal(res.geometry.length, 3);
+    assert.equal(res.distance, 312);
+    assert.equal(res.time, 62);
+    assert.deepEqual(res.steps.map(s => s.sign), [0, 2, 4]);
+    assert.equal(res.steps[1].distance, 112);
+    assert.deepEqual(res.steps.map(s => s.index), [0, 1, 0]);
+    assert.throws(() => convertDirections({ paths: [] }));
 });

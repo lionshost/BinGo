@@ -65,6 +65,15 @@ test('road-route validates input before calling VIETMAP', async () => {
     assert.equal(missingKey.status, 503);
 });
 
+test('directions validates input before calling VIETMAP', async () => {
+    assert.equal((await post('/api/directions', { to_bin_id: 'HN-0001' })).status, 400);
+    assert.equal((await post('/api/directions', { from: { lat: 'x', lon: 105.8 }, to_bin_id: 'HN-0001' })).status, 400);
+    assert.equal((await post('/api/directions', { from: { lat: 21, lon: 105.8 } })).status, 400);
+    assert.equal((await post('/api/directions', { from: { lat: 21, lon: 105.8 }, to_bin_id: 'NOPE' })).status, 400);
+    const missingKey = await post('/api/directions', { from: { lat: 21.03, lon: 105.85 }, to_bin_id: 'HN-0001' });
+    assert.equal(missingKey.status, 503);
+});
+
 test('unknown API paths return JSON 404', async () => {
     const res = await fetch(`${base}/api/nope`);
     assert.equal(res.status, 404);
