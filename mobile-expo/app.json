@@ -1,0 +1,69 @@
+{
+  "expo": {
+    "name": "BinGo",
+    "slug": "bingo-collector",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "bingo",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "vn.bingo.collector",
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "BinGo dùng camera để chụp ảnh thùng rác, giúp AI đánh giá mức đầy.",
+        "NSPhotoLibraryUsageDescription": "BinGo cần chọn ảnh thùng rác từ thư viện để AI phân tích.",
+        "NSLocationWhenInUseUsageDescription": "BinGo dùng vị trí để lập tuyến thu gom gần bạn nhất."
+      }
+    },
+    "android": {
+      "package": "vn.bingo.collector",
+      "adaptiveIcon": {
+        "backgroundColor": "#178760",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#116347",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 140
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "BinGo dùng vị trí để lập tuyến thu gom gần bạn nhất."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "cameraPermission": "BinGo dùng camera để chụp ảnh thùng rác, giúp AI đánh giá mức đầy.",
+          "photosPermission": "BinGo cần chọn ảnh thùng rác từ thư viện để AI phân tích."
+        }
+      ],
+      "@maplibre/maplibre-react-native",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo-google-fonts/be-vietnam-pro/400Regular/BeVietnamPro_400Regular.ttf",
+            "node_modules/@expo-google-fonts/be-vietnam-pro/500Medium/BeVietnamPro_500Medium.ttf",
+            "node_modules/@expo-google-fonts/be-vietnam-pro/600SemiBold/BeVietnamPro_600SemiBold.ttf",
+            "node_modules/@expo-google-fonts/be-vietnam-pro/700Bold/BeVietnamPro_700Bold.ttf"
+          ]
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}
