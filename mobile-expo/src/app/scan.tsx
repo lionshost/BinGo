@@ -3,7 +3,7 @@ import { Image } from 'expo-image';
 import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 import { useRef, useState } from 'react';
-import { ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Modal, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, Eyebrow, Text, success, tap, useToast, warn } from '@/components/ui';
@@ -74,13 +74,15 @@ export default function ScanScreen() {
         .slice(0, 10)
     : [];
 
+  const bottomPadding = (Platform.OS === 'ios' ? Math.max(insets.bottom, 12) : 16) + 84;
+
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.appbar}>
-        <Eyebrow>AI · Gemini Vision</Eyebrow>
+        <Eyebrow>AI · Computer Vision</Eyebrow>
         <Text weight="bold" style={styles.h1} accessibilityRole="header">Kiểm tra điểm thu gom</Text>
       </View>
-      <ScrollView ref={scroll} contentContainerStyle={styles.content}>
+      <ScrollView ref={scroll} contentContainerStyle={[styles.content, { paddingBottom: bottomPadding }]}>
         <Pressable style={styles.target} onPress={() => { tap(); setPicking(true); }} accessibilityRole="button">
           <View style={styles.targetIcon}>
             <MaterialIcons name={target ? 'place' : 'add-location-alt'} size={20} color={C.deep} />

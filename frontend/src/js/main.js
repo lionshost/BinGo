@@ -26,6 +26,8 @@ import { renderTruckList } from "./ui/fleet-list.js";
 import { selectTruck, updateTimelineUI, setupFocusPanelEvents } from "./ui/focus-panel.js";
 import { setupDialogsAndNavigation } from "./ui/dialogs.js";
 import { setupInspectionUI } from "./ui/inspection.js";
+import { setupNearbyAlerts } from "./ui/nearby.js";
+import { startFleetPublisher } from "./simulation/fleet-publisher.js";
 
 // Initialize Map Instance
 const map = getMapInstance();
@@ -53,6 +55,9 @@ const callbacks = {
 function handleSelectTruck(truck, userInitiated = true) {
     selectTruck(truck, map, userInitiated, callbacks);
 }
+
+setupNearbyAlerts(map);
+startFleetPublisher();
 
 // Setup simulation control buttons
 if (dom.startBtn) {
@@ -88,6 +93,12 @@ setupInspectionUI(map, callbacks);
 
 // Main bootstrap
 async function initialize() {
+    // Gọi song song map-config và trash-bins thay vì lần lượt.
+    const binsPromise = fetchTrashBins();
+    binsPromise.catch(() => {}); // lỗi được xử lý ở await bên dưới
+    if (dom.simulationStatus) {
+        dom.simulationStatus.textContent = "⏳ Đang kết nối máy chủ...";
+    }
     await ensureProviderConfig();
     setRouteControls(true);
 
@@ -97,7 +108,7 @@ async function initialize() {
         }
 
         // 1. Fetch & prepare bins
-        state.bins = await fetchTrashBins();
+        state.bins = await binsPromise;
         randomizeDemoStatuses();
         console.log(`Loaded ${state.bins.length} trash bins`);
 

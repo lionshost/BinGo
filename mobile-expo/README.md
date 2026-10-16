@@ -7,7 +7,7 @@ App Android/iOS native cho nhân viên thu gom, dùng chung backend Express vớ
 | --- | --- |
 | **Bản đồ** | 350 điểm thu gom vẽ bằng GPU (MapLibre), tìm kiếm không dấu, lọc theo trạng thái, định vị GPS, bottom sheet kéo-để-đóng: chỉ đường + dẫn đường ngay trong app (VIETMAP Route v4: banner từng bước rẽ, camera bám GPS, tự tìm lại đường khi lệch tuyến, báo tới nơi), chụp kiểm tra, đánh dấu đã thu |
 | **Tuyến** | Lập tuyến từ vị trí hiện tại qua 3–20 điểm đầy/tràn gần nhất (ưu tiên điểm tràn), đường bộ VIETMAP Route v4, tích đã thu, badge số điểm còn lại trên tab |
-| **Chụp ảnh** | Camera / thư viện → thu nhỏ ≤1280px → Gemini Vision đánh giá mức đầy, loại rác; cập nhật trạng thái điểm |
+| **Chụp ảnh** | Camera / thư viện → thu nhỏ ≤1280px → backend nhận diện bằng computer vision (YOLOv8 ONNX, Gemini dự phòng) đánh giá mức đầy, loại rác; cập nhật trạng thái điểm |
 | **Phân loại** | 4 nhóm rác, dùng chung `frontend/src/js/config/waste-taxonomy.js` (qua `metro.config.js`) |
 
 Thành phần native: thanh tab native (`NativeTabs` — Material 3 trên Android, UITabBar trên iOS),

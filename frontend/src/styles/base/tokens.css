@@ -6,10 +6,10 @@
 
   /* Brand Palette */
   --color-ink: #193d34;
-  --color-muted: #70877e;
+  --color-muted: #6b8279;
   --color-green: #178760;
   --color-deep: #116347;
-  --color-line: #e4ece6;
+  --color-line: #e2ebe5;
   --color-surface: #ffffff;
   --color-canvas: #f6f8f4;
 
@@ -20,14 +20,26 @@
   --color-card-lilac: #f3eefb;
 }
 
+/* Bảng màu BinGo — giữ trùng với app mobile (mobile/src/styles.css,
+   mobile-expo/src/lib/theme.ts) và landing (src/landing/style.css). */
 :root {
     --ink: #193d34;
-    --muted: #70877e;
+    --muted: #6b8279;
     --green: #178760;
     --deep: #116347;
-    --line: #e4ece6;
+    --green-soft: #e3f3ea;
+    --line: #e2ebe5;
     --surface: #fff;
     --canvas: #f6f8f4;
+    --blue: #2f7fc1;
+    --sky: #eaf1fb;
+
+    /* Trạng thái thùng rác */
+    --warn: #d99a1e;
+    --hot: #e0672b;
+    --danger: #c9352b;
+    --grey: #8a979a;
+
     --shadow: 0 8px 30px #294b3410;
 }
 
@@ -91,7 +103,7 @@ a {
 }
 
 button:focus-visible, a:focus-visible, select:focus-visible, input:focus-visible {
-    outline: 3px solid #4ea9f6;
+    outline: 3px solid rgb(23 135 96 / .45);
     outline-offset: 3px;
 }
 

@@ -1,7 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, View } from 'react-native';
+import { FlatList, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Button, Card, Eyebrow, Text, success, tap, useToast } from '@/components/ui';
@@ -73,6 +73,8 @@ export default function RouteScreen() {
     </View>
   );
 
+  const bottomPadding = (Platform.OS === 'ios' ? Math.max(insets.bottom, 12) : 16) + 84;
+
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
       <View style={styles.appbar}>
@@ -82,7 +84,7 @@ export default function RouteScreen() {
       <FlatList
         data={items}
         keyExtractor={b => b.id}
-        contentContainerStyle={styles.list}
+        contentContainerStyle={[styles.list, { paddingBottom: bottomPadding }]}
         ListHeaderComponent={header}
         ListHeaderComponentStyle={{ marginBottom: 4 }}
         ItemSeparatorComponent={() => <View style={{ height: 8 }} />}

@@ -16,7 +16,10 @@ export function getPool() {
             // Neon / Supabase / Render yêu cầu SSL; đặt DATABASE_SSL=false cho Postgres local.
             ssl: env.databaseSsl ? { rejectUnauthorized: false } : false,
             max: 5,
-            idleTimeoutMillis: 30000
+            idleTimeoutMillis: 30000,
+            // Truy vấn treo không được giữ kết nối mãi.
+            connectionTimeoutMillis: 10000,
+            statement_timeout: 15000
         });
         pool.on('error', err => console.error('PostgreSQL pool error:', err.message));
     }

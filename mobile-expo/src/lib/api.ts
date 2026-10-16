@@ -2,6 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import type { Bin } from './bins';
+import type { NearbyTruck } from './nearby';
 
 export const API_BASE_URL = (process.env.EXPO_PUBLIC_API_URL || '').replace(/\/+$/, '');
 const CACHE_KEY = 'bingo.bins';
@@ -110,3 +111,8 @@ export const requestDirections = (from: { lat: number; lon: number }, binId: str
 
 export const analyzeImage =(dataUrl: string, binId: string | null) =>
   request<WasteAnalysis>('/api/analyze-waste-image', { body: { image: dataUrl, bin_id: binId }, timeout: 60000 });
+
+/** Xe thu gom đang hoạt động trong bán kính (m) quanh một vị trí. */
+export const fetchNearbyTrucks = (lat: number, lon: number, radius: number) =>
+  request<{ trucks: NearbyTruck[] }>(`/api/fleet/nearby?lat=${lat}&lon=${lon}&radius=${radius}`, { timeout: 8000 })
+    .then(data => data.trucks);

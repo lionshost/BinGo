@@ -23,9 +23,9 @@
 }
 
 .stat-card.mint { background: var(--color-card-mint, #eaf6f0); border-color: #c4e5d3; }
-.stat-card.blue { background: var(--color-card-blue, #eaf1fb); border-color: #bfdbfe; }
-.stat-card.peach { background: var(--color-card-peach, #fdf1eb); border-color: #fed7aa; }
-.stat-card.lilac { background: var(--color-card-lilac, #f3eefb); border-color: #e9d5ff; }
+.stat-card.blue { background: var(--color-card-blue, #eaf1fb); border-color: #c6daee; }
+.stat-card.peach { background: var(--color-card-peach, #fdf1eb); border-color: #f6cdb5; }
+.stat-card.lilac { background: var(--color-card-lilac, #f3eefb); border-color: #ddd0f0; }
 
 .stat-icon {
     width: 48px;
@@ -43,9 +43,9 @@
 }
 
 .stat-card.mint .stat-icon { color: #116347; }
-.stat-card.blue .stat-icon { color: #1d4ed8; }
-.stat-card.peach .stat-icon { color: #c2410c; }
-.stat-card.lilac .stat-icon { color: #7e22ce; }
+.stat-card.blue .stat-icon { color: #1f5d93; }
+.stat-card.peach .stat-icon { color: #a2400f; }
+.stat-card.lilac .stat-icon { color: #6d4aa8; }
 
 .stat-card strong {
     display: block;
@@ -82,7 +82,7 @@
     top: 18px;
     font-size: 14px;
     font-weight: 700;
-    color: #2563eb;
+    color: var(--blue);
 }
 
 /* MISSION PROGRESS RING */

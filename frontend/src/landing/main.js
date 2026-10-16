@@ -1,4 +1,40 @@
+import { API_BASE_URL } from "../js/api/client.js";
+import { clearSession, getSession } from "../js/api/auth.js";
+
+/* ==========================================
+   WARM-UP BACKEND
+   Render gói free ngủ sau ~15 phút không có request, lần gọi đầu mất 30-60s.
+   Gọi /api/health ngay khi mở landing để server (và DB) thức dậy trước khi
+   người dùng bấm sang trang bản đồ.
+========================================== */
+fetch(`${API_BASE_URL}/api/health`, { cache: "no-store" }).catch(() => {});
+
 document.addEventListener("DOMContentLoaded", () => {
+
+    /* ==========================================
+       NÚT ĐĂNG NHẬP / ĐĂNG XUẤT
+    ========================================== */
+
+    const authLink = document.getElementById("authLink");
+    const session = getSession();
+
+    if (authLink && session) {
+        authLink.querySelector("span").textContent = "Đăng xuất";
+        authLink.title = session.user.name || session.user.email;
+        if (session.user.role === "admin") {
+            const adminLink = document.createElement("a");
+            adminLink.href = "admin.html";
+            adminLink.className = "nav-link-auth";
+            adminLink.innerHTML = '<i class="fa-solid fa-gauge-high"></i><span>Quản trị</span>';
+            authLink.before(adminLink);
+            authLink.style.marginLeft = "0";
+        }
+        authLink.addEventListener("click", event => {
+            event.preventDefault();
+            clearSession();
+            location.reload();
+        });
+    }
 
     /* ==========================================
        HEADER SCROLL

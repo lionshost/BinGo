@@ -122,10 +122,10 @@
     display: inline-block;
 }
 
-.dot.green { background: #16a34a; }
-.dot.orange { background: #ea580c; }
-.dot.blue { background: #2563eb; }
-.dot.gray { background: #94a3b8; }
+.dot.green { background: var(--green); }
+.dot.orange { background: var(--hot); }
+.dot.blue { background: var(--blue); }
+.dot.gray { background: var(--grey); }
 
 /* BIN MARKERS */
 .bin-icon {
@@ -144,11 +144,12 @@
     transform: scale(1.15);
 }
 
-.bin-icon.available { border-color: #16a34a; color: #16a34a; }
-.bin-icon.full { border-color: #ea580c; color: #ea580c; background: #fff7ed; }
-.bin-icon.overloaded { border-color: #dc2626; color: #dc2626; background: #fef2f2; }
-.bin-icon.collected { border-color: #2563eb; color: #2563eb; background: #eff6ff; }
-.bin-icon.broken { border-color: #94a3b8; color: #94a3b8; opacity: 0.6; }
+.bin-icon.available { border-color: var(--green); color: var(--green); }
+.bin-icon.near-full { border-color: var(--warn); color: var(--warn); background: #fdf3dc; }
+.bin-icon.full { border-color: var(--hot); color: var(--hot); background: #fde8dc; }
+.bin-icon.overloaded { border-color: var(--danger); color: var(--danger); background: #fbe1df; }
+.bin-icon.collected { border-color: var(--blue); color: var(--blue); background: var(--sky); }
+.bin-icon.broken { border-color: var(--grey); color: var(--grey); opacity: 0.6; }
 
 .bin-glyph {
     font-size: 13px;
@@ -172,7 +173,7 @@
 }
 
 .bin-stop-marker.collected {
-    background: #2563eb !important;
+    background: var(--blue) !important;
 }
 
 .bin-stop-marker.dwelling {

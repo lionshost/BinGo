@@ -1,5 +1,5 @@
 // ============================================================
-// UI INSPECTION & AI VISION MODULE (GEMINI 2.0 FLASH)
+// UI INSPECTION & AI VISION MODULE (COMPUTER VISION)
 // ============================================================
 
 import { state, dom } from "../state/store.js";
@@ -94,6 +94,8 @@ export function setupInspectionUI(map, callbacks = {}) {
         }
     });
 
+    dom.inspectBinFilter?.addEventListener("input", () => renderBinOptions());
+
     // Analyze button
     if (dom.analyzeImageBtn) {
         dom.analyzeImageBtn.addEventListener("click", () => runAnalysis(map));
@@ -142,20 +144,73 @@ export function openInspectionModal(binId = null, map = null) {
     }
 
     // Populate bin select dropdown
-    if (dom.inspectBinSelect) {
-        dom.inspectBinSelect.innerHTML = `<option value="">-- Chọn điểm thu gom (hoặc để trống) --</option>`;
-        state.bins.forEach(b => {
-            const opt = document.createElement("option");
-            opt.value = b.id;
-            opt.textContent = `${b.name} (${b.district}) - ${b.id}`;
-            if (binId && b.id === binId) {
-                opt.selected = true;
-            }
-            dom.inspectBinSelect.appendChild(opt);
-        });
-    }
+    if (dom.inspectBinFilter) dom.inspectBinFilter.value = "";
+    renderBinOptions(binId);
 
     dom.inspectDialog.showModal();
+}
+
+// Bỏ dấu + hạ chữ thường để "hoan kiem" khớp "Hoàn Kiếm".
+const fold = text => String(text).normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/đ/gi, "d").toLowerCase();
+
+/**
+ * Điền danh sách điểm thu gom, lọc theo ô tìm kiếm (hàng trăm điểm nên không thể cuộn tìm tay).
+ * Điểm đang được chọn luôn được giữ lại dù không khớp bộ lọc.
+ */
+function renderBinOptions(selectedId = null) {
+    const select = dom.inspectBinSelect;
+    if (!select) return;
+
+    const keep = selectedId ?? select.value;
+    const terms = fold(dom.inspectBinFilter?.value || "").split(/\s+/).filter(Boolean);
+    const matches = state.bins.filter(b => {
+        if (b.id === keep) return true;
+        const haystack = fold(`${b.name} ${b.district} ${b.id}`);
+        return terms.every(term => haystack.includes(term));
+    });
+
+    const fragment = document.createDocumentFragment();
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = matches.length ? "-- Chọn điểm thu gom (hoặc để trống) --" : "-- Không có điểm nào khớp --";
+    fragment.append(placeholder);
+    for (const b of matches) {
+        const opt = document.createElement("option");
+        opt.value = b.id;
+        opt.textContent = `${b.id} · ${b.name} (${b.district})`;
+        fragment.append(opt);
+    }
+    select.replaceChildren(fragment);
+    select.value = keep && matches.some(b => b.id === keep) ? keep : "";
+
+    if (dom.inspectBinCount) {
+        dom.inspectBinCount.textContent = terms.length
+            ? `Tìm thấy ${matches.length}/${state.bins.length} điểm`
+            : `${state.bins.length} điểm thu gom`;
+    }
+}
+
+// Ảnh chụp điện thoại thường 3–8 MB; server chỉ nhận ≤ 5 MB và Gemini không cần độ phân giải đó.
+// Thu nhỏ về cạnh dài ≤ 1600px, JPEG 85% → thường < 500 KB, tải lên nhanh hơn nhiều.
+const MAX_EDGE = 1600;
+
+async function compressImage(file) {
+    let bitmap;
+    try {
+        bitmap = await createImageBitmap(file);
+    } catch {
+        return null;
+    }
+    const scale = Math.min(1, MAX_EDGE / Math.max(bitmap.width, bitmap.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bitmap.width * scale);
+    canvas.height = Math.round(bitmap.height * scale);
+    const ctx = canvas.getContext("2d");
+    ctx.fillStyle = "#fff"; // PNG/WebP trong suốt → nền trắng thay vì đen khi sang JPEG
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close?.();
+    return canvas.toDataURL("image/jpeg", 0.85);
 }
 
 /**
@@ -173,8 +228,10 @@ function handleImageFile(file) {
     }
 
     const reader = new FileReader();
-    reader.onload = e => {
-        currentImageDataUrl = e.target.result;
+    reader.onload = async e => {
+        // Ưu tiên bản đã nén; nếu trình duyệt không giải mã được thì dùng ảnh gốc (đã giới hạn 8 MB).
+        const compressed = await compressImage(file).catch(() => null);
+        currentImageDataUrl = compressed || e.target.result;
         if (dom.imagePreview) {
             dom.imagePreview.src = currentImageDataUrl;
             dom.imagePreview.hidden = false;
@@ -204,7 +261,7 @@ async function runAnalysis(map) {
 
     if (dom.analyzeImageBtn) {
         dom.analyzeImageBtn.disabled = true;
-        dom.analyzeImageBtn.innerHTML = `<span class="spinner"></span> Đang phân tích bằng Gemini Vision...`;
+        dom.analyzeImageBtn.innerHTML = `<span class="spinner"></span> Đang phân tích bằng Computer Vision...`;
     }
 
     try {

@@ -3,12 +3,13 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import type { StyleSpecification } from '@maplibre/maplibre-react-native';
 import { useKeepAwake } from 'expo-keep-awake';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BinSheet } from '@/components/bin-sheet';
 import { DirectionsPanel, NavBanner } from '@/components/directions-panel';
 import { MapContainer, type MapController } from '@/components/map-container';
+import { NearbyAlert } from '@/components/nearby-alert';
 import { Text, success, tap, useToast } from '@/components/ui';
 import { inHanoi, matchesFilter, normalize, STATUS, type Filter } from '@/lib/bins';
 import { useBinGo } from '@/lib/store';
@@ -56,6 +57,7 @@ export default function MapScreen() {
   const [text, setText] = useState('');
   const [panelH, setPanelH] = useState(0);
   const [starting, setStarting] = useState(false);
+  const tabOffset = (Platform.OS === 'ios' ? Math.max(insets.bottom, 12) : 16) + 72;
   const {
     bins, byId, config, loading, error, cachedAt, load, collected, position, locate, route,
     filter, setFilter, query, setQuery, selectedId, setSelectedId, focusBin, mapRequest,
@@ -138,7 +140,7 @@ export default function MapScreen() {
       const lons = directions.geometry.map(p => p[1]);
       const lats = directions.geometry.map(p => p[0]);
       camera.current?.fitBounds([Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)], {
-        padding: { top: insets.top + 140, left: 50, right: 50, bottom: (panelH || 220) + 40 },
+        padding: { top: insets.top + 140, left: 50, right: 50, bottom: (panelH || 220) + tabOffset + 20 },
         duration: 800,
       });
     } else if (mapRequest.kind === 'route' && route) {
@@ -147,7 +149,7 @@ export default function MapScreen() {
       const lons = pts.map(p => p[0]);
       const lats = pts.map(p => p[1]);
       camera.current?.fitBounds([Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)], {
-        padding: { top: insets.top + 140, left: 40, right: 40, bottom: 60 },
+        padding: { top: insets.top + 140, left: 40, right: 40, bottom: tabOffset + 20 },
         duration: 800,
       });
     }
@@ -161,7 +163,7 @@ export default function MapScreen() {
       center: [position.lon, position.lat],
       zoom: 17,
       duration: 800,
-      padding: { top: insets.top + 120, left: 0, right: 0, bottom: (panelH || 100) + 20 },
+      padding: { top: insets.top + 120, left: 0, right: 0, bottom: (panelH || 100) + tabOffset + 20 },
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navigating, position]);
@@ -295,23 +297,30 @@ export default function MapScreen() {
       </View>
 
       {bins.length > 0 && !selectedId && !showPanel && (
-        <View style={styles.count} pointerEvents="none">
+        <View style={[styles.count, { bottom: tabOffset + 6 }]} pointerEvents="none">
           <Text weight="semibold" style={{ color: '#fff', fontSize: 12.5 }}>{visible.length} / {bins.length} điểm</Text>
         </View>
       )}
 
       {!selectedId && (
         <Pressable
-          style={({ pressed }) => [styles.fab, showPanel && { bottom: panelH + 12 }, pressed && { transform: [{ scale: 0.94 }] }]}
+          style={({ pressed }) => [
+            styles.fab,
+            { bottom: showPanel ? panelH + tabOffset + 12 : tabOffset },
+            pressed && { transform: [{ scale: 0.94 }] },
+          ]}
           onPress={onLocate} accessibilityLabel="Về vị trí của tôi">
           {locating ? <ActivityIndicator color={C.deep} /> : <MaterialIcons name="my-location" size={24} color={C.deep} />}
         </Pressable>
       )}
 
+      {!selectedId && !navigating && !showPanel && <NearbyAlert bottom={tabOffset + 66} />}
+
       {navigating && progress && dirBin && <NavBanner progress={progress} bin={dirBin} />}
 
       {showPanel && (
         <DirectionsPanel
+          bottom={tabOffset}
           directions={directions!}
           bin={dirBin!}
           navigating={navigating}
@@ -371,7 +380,6 @@ const styles = StyleSheet.create({
   count: {
     position: 'absolute',
     left: 14,
-    bottom: 26,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
@@ -380,7 +388,6 @@ const styles = StyleSheet.create({
   fab: {
     position: 'absolute',
     right: 14,
-    bottom: 18,
     width: 54,
     height: 54,
     borderRadius: 16,

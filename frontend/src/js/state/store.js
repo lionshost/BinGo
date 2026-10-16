@@ -87,6 +87,8 @@ export const dom = {
     get openInspectBtn() { return document.getElementById("openInspectBtn"); },
     get closeInspectBtn() { return document.getElementById("closeInspectBtn"); },
     get inspectBinSelect() { return document.getElementById("inspectBinSelect"); },
+    get inspectBinFilter() { return document.getElementById("inspectBinFilter"); },
+    get inspectBinCount() { return document.getElementById("inspectBinCount"); },
     get imageFileInput() { return document.getElementById("imageFileInput"); },
     get imageDropzone() { return document.getElementById("imageDropzone"); },
     get imagePreview() { return document.getElementById("imagePreview"); },

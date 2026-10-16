@@ -10,6 +10,7 @@ export function getBinStatus(item) {
 
     const statuses = {
         active: { key: "available", label: "Còn chỗ", icon: "🗑" },
+        near_full: { key: "near-full", label: "Gần đầy", icon: "🗑" },
         full: { key: "full", label: "Đầy", icon: "🗑" },
         overloaded: { key: "overloaded", label: "Quá tải", icon: "🗑" },
         broken: { key: "broken", label: "Hỏng", icon: "!" }

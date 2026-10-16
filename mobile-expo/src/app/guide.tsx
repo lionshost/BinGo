@@ -1,7 +1,7 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { LayoutAnimation, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Eyebrow, Text, tap } from '@/components/ui';
@@ -12,6 +12,7 @@ export default function GuideScreen() {
   const insets = useSafeAreaInsets();
   const groups = Object.values(WASTE_GROUPS);
   const [open, setOpen] = useState<string | null>(groups[0]?.key ?? null);
+  const bottomPadding = (Platform.OS === 'ios' ? Math.max(insets.bottom, 12) : 16) + 84;
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -19,7 +20,7 @@ export default function GuideScreen() {
         <Eyebrow>Phân loại tại nguồn</Eyebrow>
         <Text weight="bold" style={styles.h1} accessibilityRole="header">4 nhóm rác cần nhớ</Text>
       </View>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView contentContainerStyle={[styles.content, { paddingBottom: bottomPadding }]}>
         {groups.map(g => {
           const expanded = open === g.key;
           return (

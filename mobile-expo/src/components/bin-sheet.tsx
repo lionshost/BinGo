@@ -3,7 +3,7 @@ import BottomSheet, { BottomSheetView } from '@gorhom/bottom-sheet';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import { router } from 'expo-router';
 import { forwardRef, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Pill, StatusPill, Text, success, tap, useToast } from '@/components/ui';
@@ -19,6 +19,7 @@ export const BinSheet = forwardRef<BottomSheet>(function BinSheet(_props, ref) {
   const bin = selectedId ? byId.get(selectedId) : undefined;
   const done = bin ? Boolean(collected[bin.id]) : false;
   const routeIdx = bin && route ? route.binIds.indexOf(bin.id) : -1;
+  const bottomPadding = (Platform.OS === 'ios' ? Math.max(insets.bottom, 12) : 16) + 84;
 
   return (
     <BottomSheet
@@ -30,7 +31,7 @@ export const BinSheet = forwardRef<BottomSheet>(function BinSheet(_props, ref) {
       backgroundStyle={styles.bg}
       handleIndicatorStyle={{ backgroundColor: '#cdd9d3', width: 40 }}>
       <BottomSheetView
-        style={[styles.body, { paddingBottom: insets.bottom + 20 }]}>
+        style={[styles.body, { paddingBottom: bottomPadding }]}>
         {bin && (
           <>
             <View style={styles.pills}>

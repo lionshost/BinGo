@@ -159,20 +159,20 @@
 
 .stat-pill.blue {
     background: var(--color-card-blue, #eaf1fb);
-    color: #1d4ed8;
-    border-color: #bfdbfe;
+    color: #1f5d93;
+    border-color: #c6daee;
 }
 
 .stat-pill.peach {
     background: var(--color-card-peach, #fdf1eb);
-    color: #c2410c;
-    border-color: #fed7aa;
+    color: #a2400f;
+    border-color: #f6cdb5;
 }
 
 .stat-pill.lilac {
     background: var(--color-card-lilac, #f3eefb);
-    color: #7e22ce;
-    border-color: #e9d5ff;
+    color: #6d4aa8;
+    border-color: #ddd0f0;
 }
 
 .topbar-stats .stat-pill strong {

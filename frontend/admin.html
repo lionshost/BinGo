@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Quản trị - BinGo</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/src/admin/style.css">
+</head>
+<body>
+
+<header class="topbar">
+    <a href="index.html" class="brand">
+        <span class="brand-icon"><i class="fa-solid fa-recycle"></i></span>
+        <span>Bin<span>Go</span> <small>Quản trị</small></span>
+    </a>
+    <div class="topbar-right">
+        <span class="who" id="who"></span>
+        <a href="map.html" class="btn-ghost"><i class="fa-solid fa-map-location-dot"></i> Bản đồ</a>
+        <button type="button" class="btn-ghost" id="refreshBtn"><i class="fa-solid fa-rotate"></i> Làm mới</button>
+        <button type="button" class="btn-ghost" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Đăng xuất</button>
+    </div>
+</header>
+
+<main class="wrap" id="app" hidden>
+    <p class="notice" id="notice" role="alert" hidden></p>
+
+    <section class="kpis" id="kpis"></section>
+
+    <div class="grid">
+        <section class="card">
+            <h2>Trạng thái thùng rác</h2>
+            <div id="statusBars"></div>
+        </section>
+
+        <section class="card">
+            <h2>Theo loại thùng</h2>
+            <div id="typeBars"></div>
+        </section>
+
+        <section class="card">
+            <h2>Theo quận / huyện</h2>
+            <div id="districtBars"></div>
+        </section>
+
+        <section class="card">
+            <h2>Tình trạng hệ thống</h2>
+            <ul class="sys" id="system"></ul>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>Người dùng gần đây</h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Email</th><th>Tên</th><th>Quyền</th><th>Đăng nhập bằng</th><th>Ngày tạo</th></tr>
+                </thead>
+                <tbody id="users"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <p class="stamp" id="stamp"></p>
+</main>
+
+<p class="loading" id="loading">Đang kiểm tra quyền truy cập…</p>
+
+<script type="module" src="/src/admin/main.js"></script>
+</body>
+</html>

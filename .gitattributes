@@ -1,0 +1,25 @@
+# Lưu và checkout văn bản với LF trên mọi máy (tránh diff toàn file do CRLF trên Windows).
+* text=auto eol=lf
+
+# Script Windows cần CRLF
+*.bat  text eol=crlf
+*.cmd  text eol=crlf
+*.ps1  text eol=crlf
+
+# Nhị phân: không đổi xuống dòng, không diff/merge văn bản
+*.onnx binary
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.gif  binary
+*.webp binary
+*.ico  binary
+*.ttf  binary
+*.otf  binary
+*.woff binary
+*.woff2 binary
+*.jar  binary
+*.keystore binary
+
+# File sinh tự động: thu gọn trong diff trên GitHub
+package-lock.json linguist-generated=true

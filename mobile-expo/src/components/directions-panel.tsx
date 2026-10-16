@@ -53,12 +53,13 @@ export function NavBanner({ progress, bin }: { progress: NavProgress; bin: Bin }
   );
 }
 
-export function DirectionsPanel({ directions, bin, navigating, progress, starting, onStart, onStop, onClose, onLayout }: {
+export function DirectionsPanel({ directions, bin, navigating, progress, starting, bottom = 0, onStart, onStop, onClose, onLayout }: {
   directions: Directions;
   bin: Bin;
   navigating: boolean;
   progress: NavProgress | null;
   starting?: boolean;
+  bottom?: number;
   onStart: () => void;
   onStop: () => void;
   onClose: () => void;
@@ -67,13 +68,22 @@ export function DirectionsPanel({ directions, bin, navigating, progress, startin
   const insets = useSafeAreaInsets();
   const [open, setOpen] = useState(false);
   const { steps, estimate } = directions;
+  const isFloating = bottom > 0;
+  const containerPaddingBottom = isFloating ? 16 : insets.bottom + 14;
 
   // Đang dẫn đường: chỉ hiện quãng đường/thời gian còn lại + nút kết thúc.
   if (navigating) {
     const left = progress?.remainingM ?? directions.distance;
     const timeLeft = directions.time != null && directions.distance > 0 ? (directions.time * left) / directions.distance : null;
     return (
-      <View style={[styles.card, styles.navCard, { paddingBottom: insets.bottom + 14 }]} onLayout={onLayout}>
+      <View
+        style={[
+          styles.card,
+          isFloating && styles.cardFloating,
+          { bottom, paddingBottom: containerPaddingBottom },
+          styles.navCard,
+        ]}
+        onLayout={onLayout}>
         <View style={{ flex: 1 }}>
           <Text weight="bold" style={styles.summary}>
             {timeLeft != null ? `${formatTime(timeLeft)} · ` : ''}{formatDistance(left)}
@@ -90,7 +100,13 @@ export function DirectionsPanel({ directions, bin, navigating, progress, startin
   }
 
   return (
-    <View style={[styles.card, { paddingBottom: insets.bottom + 14 }]} onLayout={onLayout}>
+    <View
+      style={[
+        styles.card,
+        isFloating && styles.cardFloating,
+        { bottom, paddingBottom: containerPaddingBottom },
+      ]}
+      onLayout={onLayout}>
       <View style={styles.head}>
         <View style={styles.headIcon}>
           <MaterialIcons name="directions" size={22} color="#fff" />
@@ -164,6 +180,13 @@ const styles = StyleSheet.create({
     backgroundColor: C.surface,
     ...shadow,
     elevation: 8,
+  },
+  cardFloating: {
+    left: 14,
+    right: 14,
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: 'rgba(25, 61, 52, 0.08)',
   },
   head: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   headIcon: { width: 42, height: 42, borderRadius: 21, backgroundColor: C.blue, alignItems: 'center', justifyContent: 'center' },

@@ -58,6 +58,95 @@ function setupLegendToggle() {
     });
 }
 
+/**
+ * Vuốt xuống để đóng bottom sheet (kiểu app iOS).
+ * - `grab`: vùng luôn kéo được (thanh gạt, tiêu đề).
+ * - `scroller`: vùng nội dung cuộn; chỉ kéo sheet xuống khi nội dung đã ở đầu, còn lại là cuộn bình thường.
+ * Sheet bám theo ngón tay, thả ra quá 80px (hoặc vuốt nhanh) thì đóng, không thì bật lại.
+ */
+function makeSwipeDismissible(sheet, { grab, scroller, onDismiss }) {
+    if (!sheet) return;
+    const DISMISS_PX = 80;
+    const FLICK_PX_PER_MS = 0.5;
+    let startY = 0;
+    let startAt = 0;
+    let dy = 0;
+    let mode = "idle"; // idle → pending (chờ biết là cuộn hay kéo) → dragging | scrolling
+
+    const canDrag = target => {
+        if (!MOBILE_QUERY.matches) return false;
+        if (grab && grab.contains(target)) return true;
+        return scroller && scroller.contains(target) && scroller.scrollTop <= 0;
+    };
+
+    sheet.addEventListener("touchstart", event => {
+        if (event.touches.length !== 1 || !canDrag(event.target)) {
+            mode = "scrolling";
+            return;
+        }
+        mode = "pending";
+        startY = event.touches[0].clientY;
+        startAt = Date.now();
+        dy = 0;
+    }, { passive: true });
+
+    sheet.addEventListener("touchmove", event => {
+        if (mode === "idle" || mode === "scrolling") return;
+        const delta = event.touches[0].clientY - startY;
+        if (mode === "pending") {
+            if (delta < -4) { mode = "scrolling"; return; } // vuốt lên = cuộn nội dung
+            if (delta < 6) return;
+            mode = "dragging";
+            sheet.style.transition = "none";
+        }
+        dy = Math.max(0, delta);
+        sheet.style.transform = `translateY(${dy}px)`;
+        event.preventDefault(); // chặn trang/iOS cuộn theo khi đang kéo sheet
+    }, { passive: false });
+
+    const finish = () => {
+        const wasDragging = mode === "dragging";
+        mode = "idle";
+        if (!wasDragging) return;
+        const velocity = dy / Math.max(1, Date.now() - startAt);
+        sheet.style.transition = "";
+        sheet.style.transform = "";
+        if (dy > DISMISS_PX || (dy > 30 && velocity > FLICK_PX_PER_MS)) onDismiss();
+    };
+    sheet.addEventListener("touchend", finish);
+    sheet.addEventListener("touchcancel", finish);
+}
+
+function setupSheetGestures(map) {
+    // Bảng điều khiển: kéo thanh gạt hoặc kéo xuống khi đang ở đầu danh sách
+    makeSwipeDismissible(dom.sidebarDock, {
+        grab: document.getElementById("sheetHandle"),
+        scroller: dom.sidebarDock,
+        onDismiss: () => setSidebarCollapsed(true, map)
+    });
+
+    // Lộ trình xe: kéo tiêu đề hoặc kéo xuống khi danh sách trạm ở đầu
+    makeSwipeDismissible(dom.timelineDrawer, {
+        grab: dom.timelineDrawer?.querySelector(".timeline-drawer-header"),
+        scroller: dom.timelineDrawer?.querySelector(".timeline-stops-container"),
+        onDismiss: () => dom.closeDrawerBtn?.click()
+    });
+
+    // Nút "Mở bảng điều khiển": vuốt lên để mở bảng
+    const trigger = dom.floatingSidebarTrigger;
+    if (trigger) {
+        let startY = null;
+        trigger.addEventListener("touchstart", e => { startY = e.touches[0].clientY; }, { passive: true });
+        trigger.addEventListener("touchend", e => {
+            if (startY !== null && startY - e.changedTouches[0].clientY > 24) {
+                e.preventDefault(); // không kích hoạt thêm click
+                setSidebarCollapsed(false, map);
+            }
+            startY = null;
+        });
+    }
+}
+
 export function setupDialogsAndNavigation(map, callbacks = {}) {
     // On phones the sidebar is a bottom sheet over the map, so start it closed
     if (MOBILE_QUERY.matches) {
@@ -65,6 +154,7 @@ export function setupDialogsAndNavigation(map, callbacks = {}) {
     }
     setupMobileDistrictFilter();
     setupLegendToggle();
+    setupSheetGestures(map);
 
     const sheetHandle = document.getElementById("sheetHandle");
     if (sheetHandle) {

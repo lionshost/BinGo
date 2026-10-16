@@ -378,3 +378,19 @@ ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, latitude = EXCLUDED.latitud
 
 -- Backend truy cập bằng chuỗi kết nối Postgres (không qua API Supabase), nên bật RLS để chặn truy cập công khai qua anon key.
 ALTER TABLE trash_bins ENABLE ROW LEVEL SECURITY;
+
+-- Tài khoản người dùng (đăng ký email + đăng nhập Google)
+CREATE TABLE IF NOT EXISTS users (
+    id             TEXT PRIMARY KEY,
+    email          TEXT NOT NULL UNIQUE,
+    password_hash  TEXT,
+    google_id      TEXT UNIQUE,
+    name           TEXT NOT NULL DEFAULT '',
+    role           TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin')),
+    created_at     TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CHECK (password_hash IS NOT NULL OR google_id IS NOT NULL)
+);
+
+-- Nâng cấp DB đã có bảng users từ trước
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'));
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;

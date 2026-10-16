@@ -1,0 +1,92 @@
+:root {
+    --green: #178760;
+    --green-dark: #116347;
+    --green-soft: #e3f3ea;
+    --green-line: #c4e5d3;
+    --warn: #d99a1e;
+    --danger: #c9352b;
+    --danger-soft: #fbe1df;
+    --dark: #0f2a23;
+    --text: #193d34;
+    --muted: #6b8279;
+    --bg: #f4f8f6;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: "Be Vietnam Pro", system-ui, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+}
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 24px;
+    background: #fff;
+    border-bottom: 1px solid var(--green-line);
+}
+.brand { display: flex; align-items: center; gap: 10px; font-size: 22px; font-weight: 800; color: var(--dark); text-decoration: none; }
+.brand span span { color: var(--green); }
+.brand small { font-size: 12px; font-weight: 600; color: var(--muted); margin-left: 4px; }
+.brand-icon { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: var(--green); color: #fff; font-size: 18px; }
+.topbar-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.who { font-size: 13px; color: var(--muted); margin-right: 6px; }
+.btn-ghost {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border: 1px solid var(--green-line); border-radius: 9px;
+    background: #fff; color: var(--text); font: inherit; font-size: 13px; font-weight: 600;
+    text-decoration: none; cursor: pointer;
+}
+.btn-ghost:hover { background: var(--green-soft); }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 24px 16px 48px; }
+.wrap[hidden], .notice[hidden], .loading[hidden] { display: none; }
+.loading { text-align: center; padding: 80px 16px; color: var(--muted); }
+.notice { padding: 12px 14px; border-radius: 10px; background: var(--danger-soft); color: var(--danger); font-size: 14px; }
+
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; margin-bottom: 18px; }
+.kpi { padding: 18px; border: 1px solid var(--green-line); border-radius: 14px; background: #fff; }
+.kpi span { display: block; font-size: 13px; color: var(--muted); }
+.kpi strong { display: block; margin-top: 4px; font-size: 30px; font-weight: 800; color: var(--dark); }
+.kpi small { color: var(--muted); font-size: 12px; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 14px; margin-bottom: 14px; }
+.card { padding: 20px; border: 1px solid var(--green-line); border-radius: 14px; background: #fff; }
+.card h2 { margin: 0 0 14px; font-size: 16px; }
+
+.bar { display: grid; grid-template-columns: 130px 1fr 40px; align-items: center; gap: 10px; margin-bottom: 9px; font-size: 13px; }
+.bar-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar-track { height: 10px; border-radius: 99px; background: var(--green-soft); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; background: var(--green); }
+.bar-fill.warn { background: var(--warn); }
+.bar-fill.danger { background: var(--danger); }
+.bar-count { text-align: right; font-weight: 700; }
+.empty { color: var(--muted); font-size: 13px; }
+
+.sys { list-style: none; margin: 0; padding: 0; }
+.sys li { display: flex; justify-content: space-between; gap: 12px; padding: 9px 0; border-bottom: 1px solid var(--green-soft); font-size: 14px; }
+.sys li:last-child { border-bottom: 0; }
+.pill { padding: 2px 10px; border-radius: 99px; font-size: 12px; font-weight: 700; background: var(--green-soft); color: var(--green-dark); }
+.pill.off { background: var(--danger-soft); color: var(--danger); }
+.pill.plain { background: var(--green-soft); color: var(--muted); }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 10px 12px; text-align: left; border-bottom: 1px solid var(--green-soft); white-space: nowrap; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
+
+.stamp { margin: 16px 0 0; text-align: right; font-size: 12px; color: var(--muted); }
+
+@media (max-width: 600px) {
+    .topbar { padding: 12px 16px; }
+    .bar { grid-template-columns: 90px 1fr 36px; }
+}

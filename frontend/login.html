@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng nhập - BinGo</title>
+    <meta name="description" content="Đăng nhập hoặc đăng ký tài khoản BinGo bằng email hoặc Google.">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="/src/auth/style.css">
+</head>
+<body>
+
+<main class="auth-page">
+    <a href="index.html" class="auth-logo">
+        <span class="auth-logo-icon"><i class="fa-solid fa-recycle"></i></span>
+        <span>Bin<span>Go</span></span>
+    </a>
+
+    <section class="auth-card">
+        <div class="auth-tabs" role="tablist">
+            <button type="button" role="tab" id="tabLogin" aria-selected="true" data-mode="login">Đăng nhập</button>
+            <button type="button" role="tab" id="tabRegister" aria-selected="false" data-mode="register">Đăng ký</button>
+        </div>
+
+        <form id="authForm" novalidate>
+            <label class="field" id="nameField" hidden>
+                <span>Họ tên</span>
+                <input type="text" name="name" autocomplete="name" maxlength="80" placeholder="Nguyễn Văn A">
+            </label>
+
+            <label class="field">
+                <span>Email</span>
+                <input type="email" name="email" autocomplete="email" required placeholder="ban@example.com">
+            </label>
+
+            <label class="field">
+                <span>Mật khẩu</span>
+                <input type="password" name="password" autocomplete="current-password" required minlength="8"
+                       placeholder="Ít nhất 8 ký tự">
+            </label>
+
+            <p class="auth-error" id="authError" role="alert" hidden></p>
+
+            <button type="submit" class="auth-submit" id="authSubmit">Đăng nhập</button>
+        </form>
+
+        <div id="googleSection" hidden>
+            <div class="auth-divider"><span>hoặc</span></div>
+            <div id="googleButton" class="google-button"></div>
+        </div>
+    </section>
+
+    <a href="index.html" class="auth-back"><i class="fa-solid fa-arrow-left"></i> Về trang chủ</a>
+</main>
+
+<script type="module" src="/src/auth/main.js"></script>
+</body>
+</html>

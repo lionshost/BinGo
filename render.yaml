@@ -27,7 +27,20 @@ services:
         value: car
       - key: VIETMAP_TRUCK_WEIGHT_KG
         value: ""
+      # Gemini chỉ là dự phòng khi CV (models/trashscan8s.onnx) không đủ tin cậy; để trống = tắt.
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
         value: gemini-2.0-flash
+      # Bắt buộc ở production (thiếu thì server không khởi động). Render tự sinh chuỗi ngẫu nhiên;
+      # đổi giá trị này sẽ đăng xuất mọi phiên đang có.
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: AUTH_TOKEN_DAYS
+        value: "7"
+      # OAuth client ID (Web) của Google; để trống = ẩn nút "Tiếp tục với Google".
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      # Email Google được cấp quyền admin, cách nhau dấu phẩy.
+      - key: ADMIN_EMAILS
+        sync: false
