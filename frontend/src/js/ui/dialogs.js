@@ -20,33 +20,6 @@ export function setSidebarCollapsed(collapsed, map) {
 
 const MOBILE_QUERY = window.matchMedia("(max-width: 768px)");
 
-// On phones the district filter lives in the layer panel so the search bar has room
-function setupMobileDistrictFilter() {
-    const select = document.getElementById("districtFilter");
-    const layerPanel = document.getElementById("layerPanel");
-    if (!select || !layerPanel) return;
-
-    const homeParent = select.parentElement;
-    const homeNext = select.nextElementSibling;
-    const label = document.createElement("label");
-    label.htmlFor = "districtFilter";
-    label.textContent = "Khu vực";
-
-    const place = (isMobile) => {
-        if (isMobile) {
-            const anchor = layerPanel.querySelector('label[for="typeFilter"]');
-            layerPanel.insertBefore(label, anchor);
-            layerPanel.insertBefore(select, anchor);
-        } else {
-            label.remove();
-            homeParent.insertBefore(select, homeNext);
-        }
-    };
-
-    place(MOBILE_QUERY.matches);
-    MOBILE_QUERY.addEventListener("change", (e) => place(e.matches));
-}
-
 function setupLegendToggle() {
     const toggle = document.getElementById("legendToggle");
     const legend = document.getElementById("mapLegend");
@@ -152,40 +125,12 @@ export function setupDialogsAndNavigation(map, callbacks = {}) {
     if (MOBILE_QUERY.matches) {
         setSidebarCollapsed(true, map);
     }
-    setupMobileDistrictFilter();
     setupLegendToggle();
     setupSheetGestures(map);
 
     const sheetHandle = document.getElementById("sheetHandle");
     if (sheetHandle) {
         sheetHandle.addEventListener("click", () => setSidebarCollapsed(true, map));
-    }
-
-    // Setup modal
-    const setupDialog = dom.setupDialog;
-    if (setupDialog) {
-        ["helpBtn", "connectMapBtn"].forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) btn.addEventListener("click", () => setupDialog.showModal());
-        });
-
-        if (dom.closeSetupBtn) {
-            dom.closeSetupBtn.addEventListener("click", () => setupDialog.close());
-        }
-
-        setupDialog.addEventListener("click", event => {
-            if (event.target === setupDialog) {
-                const bounds = setupDialog.getBoundingClientRect();
-                if (
-                    event.clientX < bounds.left ||
-                    event.clientX > bounds.right ||
-                    event.clientY < bounds.top ||
-                    event.clientY > bounds.bottom
-                ) {
-                    setupDialog.close();
-                }
-            }
-        });
     }
 
     // Tabs navigation

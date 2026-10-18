@@ -173,10 +173,6 @@
                         </svg> Đội xe</button>
                 </nav>
                 <span class="demo-badge"><i></i> Không gian mô phỏng</span>
-                <button class="icon-btn" id="helpBtn" aria-label="Hướng dẫn kết nối Vietmap"
-                    title="Hướng dẫn kết nối"><svg class="icon" aria-hidden="true">
-                        <use href="#i-help" />
-                    </svg></button>
                 <span class="avatar" aria-label="BinGo">BG</span>
             </div>
         </header>
@@ -317,9 +313,6 @@
                         <input id="searchInput" type="search" placeholder="Tìm điểm, địa chỉ…"
                             aria-label="Tìm điểm thu gom">
                     </div>
-                    <select id="districtFilter" class="compact-select" aria-label="Lọc quận huyện">
-                        <option value="">Tất cả khu vực</option>
-                    </select>
                     <button id="centerMapBtn" class="icon-btn" aria-label="Về trung tâm Hà Nội"
                         title="Về trung tâm Hà Nội">
                         <svg class="icon" aria-hidden="true">
@@ -356,10 +349,6 @@
                     <h2 id="mapStateTitle">Thành phố đã sẵn sàng.<br>Chỉ còn bước kết nối.</h2>
                     <p id="mapStateText">Kết nối tài khoản VIETMAP để mở bản đồ và tìm tuyến đường cho đội xe của bạn.
                     </p>
-                    <button class="btn primary" id="connectMapBtn">Hướng dẫn kết nối <svg class="icon"
-                            aria-hidden="true">
-                            <use href="#i-arrow" />
-                        </svg></button>
                     <small>Chưa có dữ liệu bản đồ được tải. Không hiển thị nền bản đồ cũ.</small>
                 </div>
 
@@ -499,34 +488,6 @@
         </div>
     </dialog>
 
-    <!-- SETUP DIALOG MODAL -->
-    <dialog id="setupDialog" aria-labelledby="setupTitle">
-        <button id="closeSetupBtn" class="icon-btn close-dialog" aria-label="Đóng hướng dẫn"><svg class="icon"
-                aria-hidden="true">
-                <use href="#i-cross" />
-            </svg></button>
-        <span class="brand-mark"><svg class="icon" aria-hidden="true">
-                <use href="#i-map" />
-            </svg></span>
-        <p class="eyebrow">KẾT NỐI MỘT LẦN · KHÁM PHÁ MỖI NGÀY</p>
-        <h2 id="setupTitle">Mở bản đồ VIETMAP của bạn</h2>
-        <p>Bản đồ và tuyến đường sẽ được lấy từ dịch vụ VIETMAP khi tài khoản được cấu hình.</p>
-        <ol class="setup-steps">
-            <li><strong>Tạo tài khoản VIETMAP</strong><span>Nhận Tilemap key và Services key từ tài khoản của
-                    bạn.</span></li>
-            <li><strong>Thêm hai khóa vào máy chủ</strong><span>Đặt <code>VIETMAP_TILEMAP_KEY</code> và
-                    <code>VIETMAP_SERVICES_KEY</code> trong <code>backend/.env</code> (hoặc biến môi trường trên
-                    Render), rồi khởi động lại backend. Services key không xuất hiện trên trình duyệt.</span></li>
-            <li><strong>Tải lại trang và chọn “Tải tuyến”</strong><span>Mỗi lần tải tuyến có thể sử dụng hạn mức dịch
-                    vụ. Reset mô phỏng dùng lại tuyến hiện tại.</span></li>
-        </ol>
-        <a class="btn primary" href="https://maps.vietmap.vn/console-v2/register" target="_blank"
-            rel="noopener noreferrer">Đến VIETMAP <svg class="icon" aria-hidden="true">
-                <use href="#i-arrow" />
-            </svg></a>
-        <p class="footnote">Tilemap key cần được giới hạn theo tên miền. Dữ liệu mới nhất khả dụng phụ thuộc VIETMAP;
-            các vị trí thùng rác mẫu chưa được xác minh.</p>
-    </dialog>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/@vietmap/vietmap-gl-js@6/dist/vietmap-gl.js"></script>

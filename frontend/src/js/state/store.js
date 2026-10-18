@@ -72,8 +72,6 @@ export const dom = {
     get closeDrawerBtn() { return document.getElementById("closeDrawerBtn"); },
     get focusOnlyModeCheckbox() { return document.getElementById("focusOnlyMode"); },
     get visibleCount() { return document.getElementById("visibleCount"); },
-    get setupDialog() { return document.getElementById("setupDialog"); },
-    get closeSetupBtn() { return document.getElementById("closeSetupBtn"); },
     get toggleSidebarBtn() { return document.getElementById("toggleSidebarBtn"); },
     get floatingSidebarTrigger() { return document.getElementById("floatingSidebarTrigger"); },
     get sidebarDock() { return document.getElementById("sidebarDock"); },

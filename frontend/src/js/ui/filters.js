@@ -1,22 +1,17 @@
 // ============================================================
-// UI FILTERS (SEARCH, DISTRICT, TYPE, STATUS & SPEED)
+// UI FILTERS (SEARCH, TYPE, STATUS & SPEED)
 // ============================================================
 
 import { state, dom } from "../state/store.js";
 import { fillSelect, uniqueValues } from "../utils/dom.js";
 
 export function initializeFilters() {
-    fillSelect(dom.districtFilter, uniqueValues(state.bins, "district"));
     fillSelect(dom.typeFilter, uniqueValues(state.bins, "type"));
 }
 
 export function setupFilterEvents(onFilterChange) {
     if (dom.searchInput) {
         dom.searchInput.addEventListener("input", onFilterChange);
-    }
-
-    if (dom.districtFilter) {
-        dom.districtFilter.addEventListener("change", onFilterChange);
     }
 
     if (dom.typeFilter) {

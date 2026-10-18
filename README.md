@@ -24,7 +24,7 @@ BinGo/
 │   ├── src/services/  VIETMAP Route v4, CV (ONNX) + Gemini, đăng nhập, vị trí xe, rate limit
 │   ├── models/trashscan8s.onnx   Mô hình YOLOv8 (~44 MB, commit thẳng vào repo)
 │   ├── db/schema.sql  Lược đồ bảng (trash_bins, users)
-│   ├── scripts/       db-setup.js (tạo bảng + seed), make-admin.js
+│   ├── scripts/       db-setup.js (tạo bảng + seed), create-admin.js, make-admin.js
 │   └── data/*.json    Dữ liệu mẫu (seed)
 ├── trash-map/         Bản cũ (Flask + Vite), chỉ để tham khảo, không còn được triển khai
 └── render.yaml        Blueprint cho Render
@@ -66,8 +66,16 @@ App mobile: xem [mobile-expo/README.md](mobile-expo/README.md).
    ```
 
    Lệnh tạo bảng `trash_bins`, `users` và upsert 350 điểm mẫu; chạy lại nhiều lần vẫn an toàn.
-3. Cấp quyền admin cho một tài khoản đã đăng ký: `npm run make-admin -- email@x.com`
-   (hoặc đặt `ADMIN_EMAILS` và đăng nhập bằng Google).
+3. Tạo tài khoản admin (email + mật khẩu). Nếu email đã có tài khoản thì chỉ cấp quyền admin,
+   mật khẩu cũ giữ nguyên:
+
+   ```bash
+   ADMIN_EMAIL=email@x.com ADMIN_PASSWORD='mat-khau-manh' npm run create-admin
+   ```
+
+   PowerShell: `$env:ADMIN_EMAIL='email@x.com'; $env:ADMIN_PASSWORD='mat-khau-manh'; npm run create-admin`
+   (`ADMIN_NAME` tùy chọn). Cấp/thu hồi quyền cho tài khoản đã đăng ký:
+   `npm run make-admin -- email@x.com [--revoke]`, hoặc đặt `ADMIN_EMAILS` và đăng nhập bằng Google.
 
 ### 2. Backend — Render
 
