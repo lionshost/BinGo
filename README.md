@@ -132,6 +132,9 @@ phân tích ảnh đầu tiên sau khi thức dậy mất thêm vài giây để
 | POST | `/api/auth/google` | `{"credential":"<Google ID token>"}` → `{token,user}` |
 | GET | `/api/auth/me` | `Authorization: Bearer <token>` → người dùng hiện tại |
 | GET | `/api/admin/stats`, `/api/admin/users` | Chỉ admin: thống kê hệ thống, danh sách người dùng |
+| GET | `/api/admin/logins?limit=50` | Chỉ admin: lịch sử đăng nhập (email, cách, kết quả, IP, thiết bị) |
+| GET | `/api/admin/usage?days=14` | Chỉ admin: lượt gọi VIETMAP, phân tích ảnh, lượt xem trang, đăng nhập, gọi API theo ngày |
+| POST | `/api/track` | `{"page":"map"}` — web/mobile báo một lượt xem trang (landing, map, login, admin, mobile) |
 
 Lỗi dữ liệu vào trả HTTP 400; sai/hết phiên 401; thiếu quyền 403; gọi quá nhanh 429;
 lỗi nhà cung cấp/cấu hình trả 503.
@@ -162,6 +165,16 @@ Test chạy mô hình ONNX thật tự bỏ qua nếu thiếu file `backend/mode
 
 `backend/data/*.json` là **dữ liệu mẫu**: vị trí, trạng thái và đội xe không phải GPS thật.
 Xe chạy 30 km/h theo thời gian mô phỏng; tuyến đường lấy từ VIETMAP Route v4.
+
+## Thống kê trang quản trị
+
+- Bảng `login_events` lưu mỗi lượt đăng nhập/đăng ký (cả thất bại) kèm IP và user-agent, tự xoá sau 90 ngày.
+- Bảng `usage_daily` đếm theo ngày (giờ Việt Nam): `vietmap.route`, `vietmap.directions`, `vietmap.error`,
+  `vietmap.tilemap_config`, `vision.cv`, `vision.gemini`, `page.*`, `auth.*`, `api.requests`.
+  Bộ đếm gom trong bộ nhớ và ghi xuống DB mỗi 30 giây (và khi server tắt).
+- DB đã có từ trước: chạy đoạn "Thống kê cho trang quản trị" trong `db/supabase-setup.sql` (hoặc `npm run db:setup`).
+  Chưa có bảng thì server vẫn chạy, chỉ log cảnh báo và không lưu được thống kê.
+- Tile bản đồ trình duyệt tải thẳng từ VIETMAP nên không đếm được từng tile; xem tổng lượt dùng trong dashboard VIETMAP.
 
 ## Thông báo "xe thu gom gần bạn"
 

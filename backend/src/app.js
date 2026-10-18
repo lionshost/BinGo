@@ -20,6 +20,12 @@ import { createAdminRouter } from './routes/admin.js';
 import { createRateLimiter, securityHeaders } from './services/security.js';
 import { parseImageDataUrl, VisionError } from './services/waste-vision.js';
 import { analyzeWaste } from './services/waste-analysis.js';
+import { incrementUsage, recordLogin } from './repositories/analytics.js';
+
+// Trang được phép ghi lượt xem (chặn ghi metric tuỳ ý vào DB).
+export const TRACKED_PAGES = ['landing', 'map', 'login', 'admin', 'mobile'];
+// Route ghi quá dày (mỗi giây) hoặc chính là ghi thống kê: không tính vào "lượt gọi API".
+const UNCOUNTED_API = new Set(['/api/fleet/positions', '/api/track', '/api/health']);
 
 const asyncRoute = handler => (req, res, next) => Promise.resolve(handler(req, res, next)).catch(next);
 
@@ -43,6 +49,10 @@ export function createApp() {
 
     // Giới hạn chung cho mọi API; các route tốn tài nguyên/tiền có giới hạn riêng chặt hơn bên dưới.
     app.use('/api', createRateLimiter({ windowMs: 60_000, max: 300 }));
+    app.use('/api', (req, res, next) => {
+        if (!UNCOUNTED_API.has(req.originalUrl.split('?')[0])) incrementUsage('api.requests');
+        next();
+    });
     const costlyLimiter = createRateLimiter({
         windowMs: 60_000, max: 20, message: 'Bạn gọi chức năng này quá nhanh, vui lòng đợi một phút.'
     });
@@ -70,6 +80,18 @@ export function createApp() {
     });
     app.use('/api/auth', (req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
     const session = user => ({ token: signToken(user.id, env.authSecret, env.tokenTtlSeconds), user: publicUser(user) });
+    // Ghi lịch sử đăng nhập (không chờ DB để không làm chậm phản hồi).
+    const logLogin = (req, method, success, { user = null, email = '' } = {}) => {
+        incrementUsage(success ? `auth.${method}.ok` : `auth.${method}.fail`);
+        recordLogin({
+            userId: user?.id ?? null,
+            email: user?.email ?? email,
+            method,
+            success,
+            ip: req.ip,
+            userAgent: req.get('user-agent')
+        }).catch(() => {});
+    };
     // Đọc Bearer token → user hiện tại (null nếu token sai/hết hạn/user đã bị xoá).
     const authenticate = async req => {
         const match = /^Bearer (.+)$/.exec(req.get('authorization') || '');
@@ -97,6 +119,7 @@ export function createApp() {
         if (await findUserByEmail(email)) throw new AuthError('Email này đã được đăng ký.', 409);
         const user = await createUser({ email, passwordHash: await hashPassword(password), name });
         if (!user) throw new AuthError('Email này đã được đăng ký.', 409);
+        logLogin(req, 'register', true, { user });
         res.status(201).json(session(user));
     }));
 
@@ -107,11 +130,13 @@ export function createApp() {
         // Cùng một thông báo cho "sai email" và "sai mật khẩu" để không lộ email nào đã đăng ký.
         const ok = user?.passwordHash && await verifyPassword(password, user.passwordHash);
         if (!ok) {
+            logLogin(req, 'email', false, { user, email });
             if (user && !user.passwordHash) {
                 throw new AuthError('Tài khoản này đăng ký bằng Google, hãy chọn "Tiếp tục với Google".', 401);
             }
             throw new AuthError('Email hoặc mật khẩu không đúng.', 401);
         }
+        logLogin(req, 'email', true, { user });
         res.json(session(user));
     }));
 
@@ -130,6 +155,7 @@ export function createApp() {
         if (user.role !== 'admin' && env.adminEmails.includes(user.email)) {
             user = await setUserRole(user.id, 'admin');
         }
+        logLogin(req, 'google', true, { user });
         res.json(session(user));
     }));
 
@@ -150,6 +176,8 @@ export function createApp() {
         if (env.corsOrigins.length && origin && !env.corsOrigins.includes(origin)) {
             return res.status(403).json({ error: 'Origin không được phép.' });
         }
+        // Tile bản đồ trình duyệt tải thẳng từ VIETMAP; ở đây chỉ đếm được số lần lấy Tilemap key.
+        incrementUsage('vietmap.tilemap_config');
         res.set('Cache-Control', 'private, max-age=3600');
         res.json(publicConfig());
     });
@@ -246,12 +274,25 @@ export function createApp() {
         try {
             const { image, bin_id } = req.body || {};
             const result = await analyzeWaste(parseImageDataUrl(image), env);
+            incrementUsage(`vision.${result.engine === 'gemini' ? 'gemini' : 'cv'}`);
             return res.json({ ...result, bin_id: bin_id || null });
         } catch (err) {
-            if (err instanceof VisionError) return res.status(err.status).json({ error: err.message });
+            if (err instanceof VisionError) {
+                incrementUsage('vision.error');
+                return res.status(err.status).json({ error: err.message });
+            }
             throw err;
         }
     }));
+
+    // Lượt xem trang từ web/mobile: {"page":"map"}. Không lưu IP hay thông tin người xem.
+    const trackLimiter = createRateLimiter({ windowMs: 60_000, max: 60 });
+    app.post('/api/track', trackLimiter, (req, res) => {
+        const page = req.body?.page;
+        if (!TRACKED_PAGES.includes(page)) return res.status(400).json({ error: 'Trang không hợp lệ.' });
+        incrementUsage(`page.${page}`);
+        res.status(204).end();
+    });
 
     app.use('/api', (req, res) => {
         res.status(404).json({ error: 'Không tìm thấy API.' });

@@ -8,6 +8,7 @@ import { env, publicConfig } from '../config/env.js';
 import { getPool } from '../db/pool.js';
 import { listBins } from '../repositories/bins.js';
 import { listUsers, userStats } from '../repositories/users.js';
+import { listLogins, usageSeries } from '../repositories/analytics.js';
 import { activeTruckCount } from '../services/fleet.js';
 import { AuthError } from '../services/auth.js';
 
@@ -70,6 +71,18 @@ export function createAdminRouter({ authenticate, asyncRoute }) {
                 createdAt: u.createdAt
             }))
         });
+    }));
+
+    router.get('/logins', asyncRoute(async (req, res) => {
+        const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 200);
+        res.json({ events: await listLogins(limit) });
+    }));
+
+    router.get('/usage', asyncRoute(async (req, res) => {
+        const days = Math.min(Math.max(parseInt(req.query.days, 10) || 14, 1), 90);
+        const { days: dayList, metrics } = await usageSeries(days);
+        const totals = Object.fromEntries(Object.entries(metrics).map(([k, v]) => [k, v.reduce((a, b) => a + b, 0)]));
+        res.json({ days: dayList, metrics, totals });
     }));
 
     // eslint-disable-next-line no-unused-vars

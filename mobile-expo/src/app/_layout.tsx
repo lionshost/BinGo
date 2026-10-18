@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ToastProvider } from '@/components/ui';
+import { trackAppOpen } from '@/lib/api';
 import { BinGoProvider, useBinGo } from '@/lib/store';
 import { C, F } from '@/lib/theme';
 
@@ -32,6 +33,7 @@ function TabLayout() {
 
   useEffect(() => {
     SplashScreen.hideAsync();
+    trackAppOpen();
   }, []);
 
   const bottomMargin = Platform.OS === 'ios' ? Math.max(insets.bottom, 12) : 16;

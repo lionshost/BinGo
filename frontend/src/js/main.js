@@ -28,6 +28,9 @@ import { setupDialogsAndNavigation } from "./ui/dialogs.js";
 import { setupInspectionUI } from "./ui/inspection.js";
 import { setupNearbyAlerts } from "./ui/nearby.js";
 import { startFleetPublisher } from "./simulation/fleet-publisher.js";
+import { trackPageView } from "./api/track.js";
+
+trackPageView("map");
 
 // Initialize Map Instance
 const map = getMapInstance();

@@ -54,6 +54,36 @@
         </section>
     </div>
 
+    <h2 class="section-title">Lượt sử dụng · 14 ngày gần nhất</h2>
+    <section class="kpis" id="usageKpis"></section>
+
+    <div class="grid grid-wide">
+        <section class="card">
+            <div class="tabs" id="usageTabs" role="tablist" aria-label="Chọn số liệu"></div>
+            <p class="caption" id="usageCaption"></p>
+            <div class="usage-chart" id="usageChart"></div>
+            <div class="tip" id="usageTip" role="status" hidden></div>
+        </section>
+
+        <section class="card">
+            <h2>Lượt xem theo trang</h2>
+            <div id="pageBars"></div>
+            <p class="caption note">Tile bản đồ tải thẳng từ VIETMAP nên máy chủ chỉ đếm được số lần lấy Tilemap key, không đếm từng tile.</p>
+        </section>
+    </div>
+
+    <section class="card">
+        <h2>Lịch sử đăng nhập <small class="muted">50 lượt gần nhất · lưu 90 ngày</small></h2>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr><th>Thời gian</th><th>Email</th><th>Cách</th><th>Kết quả</th><th>IP</th><th>Thiết bị</th></tr>
+                </thead>
+                <tbody id="logins"></tbody>
+            </table>
+        </div>
+    </section>
+
     <section class="card">
         <h2>Người dùng gần đây</h2>
         <div class="table-wrap">

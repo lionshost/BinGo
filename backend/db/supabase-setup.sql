@@ -394,3 +394,28 @@ CREATE TABLE IF NOT EXISTS users (
 -- Nâng cấp DB đã có bảng users từ trước
 ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT NOT NULL DEFAULT 'user' CHECK (role IN ('user', 'admin'));
 ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+-- ------------------------------------------------------------
+-- Thống kê cho trang quản trị: lịch sử đăng nhập + lượt dùng theo ngày
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS login_events (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     TEXT,
+    email       TEXT NOT NULL,
+    method      TEXT NOT NULL CHECK (method IN ('email', 'google', 'register')),
+    success     BOOLEAN NOT NULL,
+    ip          TEXT,
+    user_agent  TEXT,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS login_events_created_idx ON login_events (created_at DESC);
+
+-- metric: vietmap.route, vietmap.directions, vietmap.error, vision.cv, page.map, auth.email.ok, api.requests…
+CREATE TABLE IF NOT EXISTS usage_daily (
+    day     DATE NOT NULL,
+    metric  TEXT NOT NULL,
+    count   BIGINT NOT NULL DEFAULT 0,
+    PRIMARY KEY (day, metric)
+);
+ALTER TABLE login_events ENABLE ROW LEVEL SECURITY;
+ALTER TABLE usage_daily ENABLE ROW LEVEL SECURITY;

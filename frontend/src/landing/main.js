@@ -1,5 +1,8 @@
 import { API_BASE_URL } from "../js/api/client.js";
 import { clearSession, getSession } from "../js/api/auth.js";
+import { trackPageView } from "../js/api/track.js";
+
+trackPageView("landing");
 
 /* ==========================================
    WARM-UP BACKEND

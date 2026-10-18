@@ -1,6 +1,7 @@
 import { createApp } from './app.js';
 import { env, cvModelAvailable, cvModelPath } from './config/env.js';
 import { closePool } from './db/pool.js';
+import { flushUsage, pruneLogins } from './repositories/analytics.js';
 
 const app = createApp();
 
@@ -21,11 +22,18 @@ server.headersTimeout = 20_000;
 server.keepAliveTimeout = 5_000;
 server.maxHeadersCount = 50;
 
+// Bộ đếm lượt dùng ghi xuống DB theo lô; lịch sử đăng nhập giữ 90 ngày.
+const flushTimer = setInterval(flushUsage, 30_000);
+const pruneTimer = setInterval(pruneLogins, 24 * 3600_000);
+flushTimer.unref();
+pruneTimer.unref();
+pruneLogins();
+
 // Một promise lỗi lọt lưới không được làm sập cả tiến trình.
 process.on('unhandledRejection', reason => console.error('unhandledRejection:', reason));
 
 function shutdown() {
-    server.close(() => closePool().finally(() => process.exit(0)));
+    server.close(() => flushUsage().finally(() => closePool().finally(() => process.exit(0))));
 }
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);

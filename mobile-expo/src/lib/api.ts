@@ -116,3 +116,6 @@ export const analyzeImage =(dataUrl: string, binId: string | null) =>
 export const fetchNearbyTrucks = (lat: number, lon: number, radius: number) =>
   request<{ trucks: NearbyTruck[] }>(`/api/fleet/nearby?lat=${lat}&lon=${lon}&radius=${radius}`, { timeout: 8000 })
     .then(data => data.trucks);
+
+// Đếm lượt mở app cho trang quản trị (chỉ gửi tên trang, lỗi thì bỏ qua).
+export const trackAppOpen = () => request('/api/track', { body: { page: 'mobile' }, timeout: 10000 }).catch(() => {});

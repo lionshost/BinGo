@@ -3,6 +3,8 @@
 // Road geometry and stop snapping with Polyline5 decoding
 // ============================================================
 
+import { incrementUsage } from "../repositories/analytics.js";
+
 export const MAX_STOPS = 100;
 export const MAX_SNAP_METERS = 300;
 
@@ -161,13 +163,15 @@ export function convert(payload, bins, vehicle) {
     };
 }
 
-async function fetchWithThrottle(url, timeoutMs = 15000) {
+// kind: "route" | "directions" — đếm mỗi lượt gọi VIETMAP thật (tính vào hạn mức trả phí).
+async function fetchWithThrottle(url, kind, timeoutMs = 15000) {
     const now = performance.now();
     const delay = 250 - (now - lastRequestTime);
     if (delay > 0) {
         await new Promise(resolve => setTimeout(resolve, delay));
     }
     lastRequestTime = performance.now();
+    incrementUsage(`vietmap.${kind}`);
 
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -199,6 +203,7 @@ async function fetchWithThrottle(url, timeoutMs = 15000) {
         }
         return payload;
     } catch (err) {
+        incrementUsage("vietmap.error");
         if (err instanceof RoutingError) throw err;
         throw new RoutingError("Không kết nối được VIETMAP. Hãy thử tải lại tuyến.");
     } finally {
@@ -265,7 +270,7 @@ export async function directions(from, to, settings) {
     for (const item of [from, to]) {
         params.append("point", `${item.latitude.toFixed(6)},${item.longitude.toFixed(6)}`);
     }
-    const payload = await fetchWithThrottle(`https://maps.vietmap.vn/api/route/v4?${params.toString()}`);
+    const payload = await fetchWithThrottle(`https://maps.vietmap.vn/api/route/v4?${params.toString()}`, "directions");
     return { ...convertDirections(payload), profile: vehicle };
 }
 
@@ -278,7 +283,7 @@ export async function roadRoute(bins, settings) {
     }
 
     const url = `https://maps.vietmap.vn/api/route/v4?${params.toString()}`;
-    const payload = await fetchWithThrottle(url);
+    const payload = await fetchWithThrottle(url, "route");
     const result = convert(payload, requested, vehicle);
 
     if (bins.length === 1) {

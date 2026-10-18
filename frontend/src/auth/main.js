@@ -1,6 +1,9 @@
 import {
     fetchAuthConfig, getSession, login, loginWithGoogle, register, saveSession
 } from "../js/api/auth.js";
+import { trackPageView } from "../js/api/track.js";
+
+trackPageView("login");
 
 const form = document.getElementById("authForm");
 const errorBox = document.getElementById("authError");
